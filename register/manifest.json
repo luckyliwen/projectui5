@@ -14,7 +14,7 @@
 		
 		"dataSources": {
 			"mainService": {
-				"uri": "http://localhost:8731/projectMng/ODataSrv",
+				"uri": "/odata/projectodataSrv",
 				"type": "OData",
 				"settings": {
 					"odataVersion": "2.0"
