@@ -1,0 +1,242 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:html="http:www.w3.org1999xhtml"
+    xmlns:table="sap.ui.table"
+    xmlns:commons="sap.ui.commons"
+    xmlns:core="sap.ui.core"
+    xmlns:mylib="csr.lib"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form">
+
+    <Page  id="detailPage" title="New Project">
+ <IconTabBar>
+        <items>
+            <IconTabFilter
+                icon="sap-icon://activity-individual"
+                text="Project Information">
+                <content>
+                    <form:SimpleForm id="projectForm" 
+                          layout="ResponsiveGridLayout" 
+                          labelSpanL="4"
+                          labelSpanM="4"
+                         >
+                        <form:content>
+                                <Label text="Title"  required="true" tooltip=""/>
+                                <Input value="{/Title}"  />
+                                
+                                <Label text="Description" tooltip="Long description of the project, normally include time, venue..."/>
+                                <TextArea rows="2" value="{/Description}" /> 
+
+                                <Label text="Link"  tooltip="URL which provide extra information"/>
+                                <Input value="{/Link}"  />
+
+                                <Label text="Support Multiple Entries" 
+                                    tooltip="One employee can create multiple entries, like the kid@sap one parent can register multiple children "/>
+                                <CheckBox selected="{/MultipleEntry}" />
+
+                                <Label text="Display Project Information at the top of form" 
+                                    tooltip="If not checked, then user need click button to show project information"/>
+                                <CheckBox selected="{/DisplayProjectInfoAtTop}" />
+
+                                <Label text="Deadline" tooltip="The deadline which employee must finish"/>
+                                <Input value="{/Deadline}"  /> 
+
+                                <Label text="Maximum Registration Number" tooltip="The maximum number of administrator can approve"/>
+                                <Input value="{/MaxNum}"  /> 
+
+
+                                <Label text="Need Approve Process" tooltip=""/>
+                                <CheckBox selected="{/NeedAprrove}" />
+
+                                <Label text="Allow cancel myself" tooltip=""/>
+                                <CheckBox selected="{/AllowCancel}" />
+
+                              <!--   <Label text="Form download URL"  tooltip="The URL of form downloading "/>
+                                <Input value="{/FormDownloadUrl}"  /> -->
+                            </form:content>
+                        </form:SimpleForm>
+                    </content>
+            </IconTabFilter>
+            <IconTabFilter
+                text="Form Design"
+                icon="sap-icon://form">
+                <content>
+
+<table:Table  visibleRowCount="20"
+         selectionMode="Single"
+        rowSelectionChange="onFormTableRowSelectChanged"
+        id="formTable"
+        rows="{/}">
+         <table:toolbar>
+            <Toolbar>
+                <content>
+                     <Button  
+                        text="Add Common Items"
+                        tooltip="Add common used items, such as email, age..."
+                        id="rowAddCommonBtn"
+                        type="Emphasized"
+                        press="onRowAddCommonPressed">
+                    </Button>
+                    
+                    <ToolbarSpacer />
+                    <Button  
+                        id="rowAddBtn"
+                        text="Add Customized Item"
+                        tooltip="Add customized items as you like: define the type, label, toolip, candidate..."
+                        icon="sap-icon://add"
+                        press="onRowAddPressed">
+                    </Button>
+                    <ToolbarSpacer />
+                    <Button
+                            text="Clear"
+                            id="rowClearBtn"
+                            press="onRowClearPressed">
+                        </Button>
+                        <Button
+                            id="rowDeleteBtn"
+                            icon="sap-icon://delete"
+                            press="onRowDelPressed">
+                        </Button>
+                        
+                        <Button
+                            id="rowTopBtn"
+                            icon="sap-icon://arrow-top"
+                            tooltip="Move to Top"
+                            press="onRowTopPressed">
+                        </Button>
+                        <Button
+                            id="rowUpBtn"
+                            icon="sap-icon://slim-arrow-up"
+                            tooltip="Move Up"
+                            press="onRowUpPressed">
+                        </Button>
+                        <Button
+                            id="rowDownBtn"
+                            icon="sap-icon://slim-arrow-down"
+                            tooltip="Move Down"
+                            press="onRowDownPressed">
+                        </Button>
+                        <Button
+                            id="rowBottomBtn"
+                            icon="sap-icon://arrow-bottom"
+                            tooltip="Move to Bottom"
+                            press="onRowBottomPressed">
+                        </Button>
+                </content>
+            </Toolbar>
+        </table:toolbar>
+        <table:columns>
+            <table:Column  width="6%" >
+                <table:label>
+                    <Label text="Mandatory" tooltip="Mandatory"/>
+                </table:label>
+                <table:template>
+                    <CheckBox selected="{mandatory}" />
+                </table:template>
+            </table:Column>
+
+            <table:Column width="14%">
+                <table:label>
+                    <Label text="type" /> 
+                </table:label>
+                <table:template>
+                    <Select selectedKey="{type}">
+                        <core:Item  key="Input"  text="Input" />
+                        <core:Item  key="Date"  text="Date" />
+                        <core:Item  key="List"  text="List" />
+                        <core:Item  key="Attachment"  text="Attachment" />
+
+                    </Select>
+                </table:template>
+            </table:Column>
+
+            <table:Column width="18%">
+                <table:label>
+                    <Label text="Label" /> 
+                </table:label>
+                <table:template>
+                    <Input value="{label}" />
+                </table:template>
+            </table:Column>
+
+             <table:Column width="22%">
+                <table:label>
+                    <Label text="Tooltip" tooltip="Inut some explan information to help user how to fill" /> 
+                </table:label>
+                <table:template>
+                    <Input value="{tooltip}" />
+                </table:template>
+            </table:Column>
+
+            <table:Column width="40%">
+                <table:label>
+                    <Label text="Candidate seperate by ';', only valid for List type" 
+                        tooltip="Only need when type is List. Seperate it by ;"/> 
+                </table:label>
+                <table:template>
+                    <Input value="{candidate}" visible="{path: 'type', formatter: '.fmtCandidate'}"/>
+                </table:template>
+            </table:Column>
+            
+        </table:columns>
+    </table:Table>
+
+
+                </content>
+            </IconTabFilter>
+        </items>
+    </IconTabBar>
+
+  		 <footer>  
+            <Bar id="footerBar">
+                <contentRight>
+                    <Button
+                        text="Save"
+                        type="Emphasized"
+                        icon="sap-icon://save"
+                        id="saveBtn"
+                        press="onSavePressed"
+                        >
+                    </Button>
+
+                    <Button
+                        text="Delete"
+                        icon="sap-icon://delete"
+                        id="deleteBtn"
+                        press="onDeletePressed"
+                        />
+                    <Button
+                        text="Duplicate"
+                        tooltip="Create new project by copy existing content"
+                        icon="sap-icon://duplicate"
+                        id="duplicateBtn"
+                        press="onDuplicatePressed"
+                        />
+                    <Button
+                        text="Preview"
+                        tooltip="Preview locally, very fast"
+                        icon="sap-icon://display"
+                        id="previewBtn"
+                        press="onPreviewPressed"
+                        />
+                     <Button
+                        text="Employee Registration Window"
+                        tooltip="Open the registration window for Employee"
+                        icon="sap-icon://form"
+                        id="openRegistrationBtn"
+                        press="onOpenRegistrationPressed"
+                        />   
+                    <Button
+                        text="Administrator Explore Window"
+                        tooltip="Open the explore window for Administrator"
+                        icon="sap-icon://explorer"
+                        id="openExploreBtn"
+                        press="onOpenExplorePressed"
+                        />           
+                </contentRight>
+            </Bar>
+        </footer>
+
+    </Page>
+</core:FragmentDefinition>       
+

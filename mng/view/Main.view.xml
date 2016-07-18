@@ -1,0 +1,63 @@
+<core:View
+    controllerName="csr.mng.controller.Main"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <SplitApp class="sapUiSizeCompact">
+        <masterPages>
+            <Page
+                title="Project Management">
+                <content>
+                    <SearchField
+                        id="searchEvent"
+                        search="onListSearchPressed"
+                        liveChange="onListSearchLiveChanged">
+                    </SearchField>
+                    <List
+                        growing="true"  growingThreshold="50"
+                        id="projectList"
+                        noDataText="No Project"
+                        mode="SingleSelectMaster"
+                        selectionChange="onListSelectionChanged"
+                        >
+
+                           <ObjectListItem
+                                title="{Title}"
+                                number="{path: 'ProjectId', formatter: '.fmtProjectId'}"
+                                >
+                                <attributes>
+                                    <ObjectAttribute
+                                        text="{Description}" >
+                                    </ObjectAttribute>
+                                </attributes>
+                                <firstStatus>
+                                    <ObjectStatus
+                                        text="{Author}" state="Success">
+                                    </ObjectStatus>
+                                </firstStatus>
+                            </ObjectListItem>
+
+                    </List>
+                </content>
+                 <footer> <Bar>
+                <contentRight>
+                    <Button
+                        text="New"
+                        type="Emphasized"
+                        press="onNewProjectPressed"
+                        icon="sap-icon://add"
+                        id="newProjectBtn"
+                        />
+                    </contentRight>
+                </Bar>
+            </footer>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <core:Fragment
+                fragmentName="csr.mng.view.Detail"
+                type="XML">
+            </core:Fragment>
+        </detailPages>
+    </SplitApp>
+</core:View>

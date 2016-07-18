@@ -1,0 +1,70 @@
+<core:View
+    controllerName="csr.explore.controller.Explore"
+    xmlns="sap.m"  xmlns:table="sap.ui.table" 
+    xmlns:core="sap.ui.core" class="sapUiSizeCompact">
+<App>
+<pages>
+    <Page   title="Coperator Social Responsibility Tool"
+        titleLevel="H2" class="sapUiSizeCompact">
+        <content>
+
+    <table:Table id="registrationTable"
+        visibleRowCount="25"  showColumnVisibilityMenu="true"
+        selectionMode="MultiToggle"
+        rowSelectionChange="onRegistrationTableRowSelectChanged">
+
+       <!--   <table:toolbar>
+            <Toolbar>
+                <content>
+                </content>
+            </Toolbar>
+        </table:toolbar> -->
+    </table:Table>
+            
+        </content>
+        <footer>
+            <Bar>
+                <contentRight>
+                    <Button  id="deleteBtn"  visible="false"  enabled="false"
+                        text="Delete"
+                        icon="sap-icon://delete"
+                        press="onDeletePressed">
+                    </Button>
+                    <Button
+                        visible="false"  enabled="false"
+                        text="Approve"
+                        type="Accept"
+                        icon="sap-icon://approvals"
+                        id="approveBtn"
+                        press="onApproveRejectPressed"
+                        >
+                    </Button>
+                    <Button
+                        visible="false"  enabled="false"
+                        text="Reject"
+                        type="Reject"
+                        icon="sap-icon://employee-rejections"
+                        id="rejectBtn"
+                        press="onApproveRejectPressed">
+                    </Button>
+                      <Button  id="emailBtn"  enabled="false"  
+                        text="Send Email"
+                        icon="sap-icon://email"
+                        press="onSendEmailPressed">
+                    </Button>
+                    
+                    <Button
+                        id="exportBtn"
+                        icon="sap-icon://excel-attachment"
+                        press="onTableExportPressed">
+                    </Button>
+                </contentRight>
+                <contentMiddle>
+                    
+                </contentMiddle>
+            </Bar>
+        </footer>
+    </Page>
+</pages>
+</App>
+</core:View>

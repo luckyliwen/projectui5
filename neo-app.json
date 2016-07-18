@@ -1,0 +1,62 @@
+{
+	
+	"welcomeFile": "register/index.html",
+	
+	"routes": [{
+			"path": "/resources",
+			"target": {
+				"type": "service",
+				"name": "sapui5",
+				
+				"entryPath": "/resources"
+			},
+			"description": "SAPUI5 Resources"
+		}, {
+			"path": "/test-resources",
+			"target": {
+				"type": "service",
+				"name": "sapui5",
+				
+				"entryPath": "/test-resources"
+			},
+			"description": "SAPUI5 Test Resources"
+		},
+
+		{
+			"path": "/odata/projectodataSrv",
+			"target": {
+				"type": "destination",
+				"name": "projectodata",
+				"entryPath": "/ODataSrv"
+			},
+			"description": "projectodata Srv"
+		},
+
+		{
+			"path": "/sap/ui5/1/resources/odata/projectodataSrv",
+			"target": {
+				"type": "destination",
+				"name": "projectodata",
+				"entryPath": "/ODataSrv"
+			},
+			"description": "projectodata Srv"
+		}
+	],
+	"cacheControl": [{
+		"directive": "private",
+		"maxAge": 0,
+		"path": "*html"
+	}, {
+		"directive": "public",
+		"maxAge": 31536000
+	}],
+	"securityConstraints": [
+        {
+            
+            "description": "Access User Data",
+            "protectedPaths": [
+                "/"
+            ]
+        }
+    ]
+}
