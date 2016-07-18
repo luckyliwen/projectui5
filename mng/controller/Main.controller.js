@@ -74,7 +74,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 
 	setDetailPageTitle: function( evt ) {
 		if (this.projectCfg.ProjectId) {
-	    	this.oDetailPage.setTitle("ID: " + this.projectCfg.ProjectId + "  " + this.projectCfg.Title);
+	    	this.oDetailPage.setTitle("ID: " + this.projectCfg.ProjectId + "    Title:" + this.projectCfg.Title);
 		} else {
 			this.oDetailPage.setTitle("New Project");
 		}
@@ -274,7 +274,17 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	
 	openOtherWindow: function( newApp) {
 	    var href = document.location.href;   //change the /mng/ to /register/, and add project=
-		var newHref = href.replace('/mng/',  '/' + newApp + '/');
+	    //when run inside the lanchPad, url like
+		//https://flpportal-p1941824928trial.dispatcher.hanatrial.ondemand.com/sites?siteId=6effabf2-ebba-4220-b05a-d07fbefbab54#project-mng
+		//in this case, we need use the static url
+		var newHref = "";
+		if ( href.indexOf("siteId=") != -1) {
+			var root = Config.getConfigure().Ui5RootUrl;
+			newHref = root + "/" + newApp + "/index.html"
+		} else {
+			newHref = href.replace('/mng/',  '/' + newApp + '/');
+		}
+
 		//then add the param: 
 		var pos = newHref.indexOf("?");
 		if (pos == -1) 
