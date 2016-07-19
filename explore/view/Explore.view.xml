@@ -12,7 +12,19 @@
         visibleRowCount="25"  showColumnVisibilityMenu="true"
         selectionMode="MultiToggle"
         rowSelectionChange="onRegistrationTableRowSelectChanged">
-
+ <table:toolbar>
+            <Toolbar>
+                <content>
+                    <Title id="regTableText" />
+                    <ToolbarSpacer />
+                    <Button
+                        id="freshTable"
+                        icon="sap-icon://refresh"
+                        press="onRefreshButtonpressed">
+                    </Button>
+                </content>
+            </Toolbar>
+        </table:toolbar>
        <!--   <table:toolbar>
             <Toolbar>
                 <content>

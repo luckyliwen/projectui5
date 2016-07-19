@@ -47,6 +47,8 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
     	this.oEntryModel = new JSONModel();
 
+    	//the pending update attachments
+    	this.mPendingUpdateAttachment = null;
 	},
 
 	getProjectConfigure: function(  ) {
@@ -347,9 +349,10 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    this.checkButtonStatus();
 	    //!!now the file name not update automaticaly, so just update it manually
 	    var uploader = oEvent.getSource();
-	    var path = uploader.getBinding("fileName").getPath();
-	    path = path.substr(1);
-	    this.mRegister[path] = uploader.getFileName();
+	    //here need use the setProperty to update, so all register event will no notified
+	    var binding = uploader.getBinding("fileName");
+	    var model = binding.getModel();
+	    model.setProperty(binding.getPath(), uploader.getFileName());
 	},
 	
 	
@@ -401,7 +404,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    }
 	    
 	    function onRegActionError(error) {
-	    	that.getView().setBusy(false);
+	    	that.setBusy(false);
 	    	that.onActionError(error, oldAction);
 	    }
 
@@ -413,12 +416,16 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
 	    //as there are some extra data, so here need just get the required data 
 	    var mData = jQuery.extend({}, true, this.mRegister);
-
+		delete mData.EntriesCount;
+		
 	    //for the null value, need delete 
 	    for (var key in mData) {
 	    	if ( mData[key] === null) {
 	    		delete mData[key];
 	    	}
+	    	//as now the attchment will upload later by seperate task, so now we will not set the attachment name 
+	    	if ( key.indexOf("FileName") ==0)
+	    		delete mData[key];	
 	    }
 	    //for the new entry, need set the projectId 
 	    mData.ProjectId = this.projectId;
@@ -448,6 +455,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	//so change to only when previos finished then do next 
 	uploadAttachments: function( btn, action) {
 		this.aNeedUploader = [];
+		this.mPendingUpdateAttachment = null;
 		// this.triggeredBtn = btn;
 
 		for (var i=0; i < this.aUploader.length; i++) {
@@ -462,7 +470,6 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    	this.lastPendingAction = action;
 	    	this.uploadAttachmentStepByStep();
 	    } else {
-	    	this.getView().setBusy(false);
 	    	this.onActionSuccesss(action);
 	    }
 	},
@@ -481,21 +488,67 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
  			oUploader.setModified(false);	
 		} else {
 			//all finished, can show toast now
-			this.getView().setBusy(false);
 			this.onActionSuccesss( this.lastPendingAction);
 		}
 	},
 
+	//need know which attachment succesful 
 	onUploadFileFinished: function( evt ) {
+		if ( this.mPendingUpdateAttachment == null) {
+			this.mPendingUpdateAttachment = {};	
+		}
+		var uploader = evt.getSource();
+		this.mPendingUpdateAttachment[ uploader.data('type') ] = uploader.getFileName();
+		
 	    this.uploadAttachmentStepByStep();
 	},
 
 	onUploadFileFailed: function( evt ) {
 	    this.uploadAttachmentStepByStep();
+	    //!!later need tell user which file failed
 	},
 	
+	onAttachmentDelPressed: function( evt) {
+		if ( !this.mRegister.RegisterId) {
+			Util.info("Attachment not upload to server, no need delete!");
+		}
+		
+	    var that = this;
+	    var btn = evt.getSource();
+	    function onDelSuccess() {
+	    	that.setBusy(false);
+	    	//clear the property
+	    	Util.showToast("Delete attachment successful");
+	    	var binding = btn.getBinding('enabled');
+	    	var model = binding.getModel();
+	    	//now btn binding to property, so can directly set it
+	    	model.setProperty(binding.getPath(), "");
 
+	    	//after delete the attachment, need update the register also
+	    	var mData = {};
+	    	mData[ btn.data('property') ] = "";
+	    	var path = "/Registrations(ProjectId=" + that.projectId + "L,RegisterId=" 
+	    		+ that.mRegister.RegisterId + "L,UserId='" + that.mRegister.UserId + "')";
+			that.oDataModel.update(path, mData);
+	    }
+	    
+	    function onDelError(error) {
+	    	that.setBusy(false);
+	    }
+
+		// (EntryId='2',ProjectId='1',Type='FileName0',UserId='I068108');
+		var url = "/Attachments(EntryId='{0}',ProjectId='{1}',Type='{2}',UserId='{3}')";
+		url = url.sapFormat(this.mRegister.RegisterId, this.projectId, btn.data('type'), this.mRegister.UserId);
+		this.oDataModel.remove(url, {
+    		success: onDelSuccess, 
+    		error:   onDelError,
+    	});
+		this.setBusy(true);
+	},
+	
+	//!!later we can combine update attachment and other together, no update twice
 	onActionSuccesss: function(oldAction ) {
+		//now only the first time 
 		Util.showToast(oldAction + " successful!");
 		
 		//update the page title 
@@ -503,6 +556,30 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
 	    this.createOrUpdateFooterButton();
 		this.checkButtonStatus();
+
+		var that = this;
+		function onUpdateAttachmentSuccess(oData) {
+			Util.showToast("Update attachment name successful!");
+			that.setBusy(false);
+		}
+
+		function onUpdateAttachmentError(error) {
+	    	that.setBusy(false);
+	    	Util.showError("Update attachment name error ", error);
+	    }
+
+		if ( !this.mPendingUpdateAttachment) {
+			that.setBusy(false);
+		} else {
+			var path = "/Registrations(ProjectId=" + this.projectId + "L,RegisterId=" 
+	    		+ this.mRegister.RegisterId + "L,UserId='" + this.mRegister.UserId + "')";
+			this.oDataModel.update(path, this.mPendingUpdateAttachment, 
+				{
+					success: onUpdateAttachmentSuccess,
+					error: onUpdateAttachmentError
+				}
+			);
+		}
 	},
 
 	onActionError: function( error, oldAction) {

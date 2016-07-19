@@ -96,15 +96,15 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		var binding = link.getBinding('text');
 		var property = binding.getPath();
 		//from the property can get the cfg path 
-		var label ;
-		for (var i=0; i < this.aFormCfg.length; i++) {
-			if (property == this.aFormCfg[i].property) {
-				label = this.aFormCfg[i].label;
-				break;
-			}
-		}
+		// var label ;
+		// for (var i=0; i < this.aFormCfg.length; i++) {
+		// 	if (property == this.aFormCfg[i].property) {
+		// 		label = this.aFormCfg[i].label;
+		// 		break;
+		// 	}
+		// }
 
-		var type = Util.getTypeFromLabel(label);
+		var type = property;
 		var data = link.getBindingContext().getProperty();
 
 	    var url = Util.getAttachmentUploaderUrl( data.UserId, data.ProjectId,
@@ -118,6 +118,8 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		this.aFormCfg.unshift({property: 'Status', label: 'Status', tooltip: "Status"});
 		this.aFormCfg.unshift({property: 'SapUserName', label: 'SAP user name', tooltip: "SAP User name get from system"});
 		this.aFormCfg.unshift({property: 'UserId', label: 'SAP user ID', tooltip: "SAP User ID get from system"});
+		this.aFormCfg.unshift({property: 'SubmittedTime', label: 'Submitted Time', tooltip: "Submitted Time"});
+		
 
 		//if support multiple entry, then add that so can easy know who create multiple entry
 		if ( this.projectCfg.MultipleEntry) {
@@ -136,7 +138,12 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 
 			var template;
 			if (cfg.type != Enum.ControlType.Attachment) {
-				template =  new sap.m.Text({text: path });
+				if ( cfg.property == "SubmittedTime") {
+					template =  new sap.m.Text(
+						{ text: { path: cfg.property, formatter: Util.fmtTime} });
+				} else {
+					template =  new sap.m.Text({text: path });
+				}
 			} else {
 				template = new sap.m.Link({
 					text: path,  
@@ -157,11 +164,24 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		this.refreshRegisterTable();
 	},
 	
+	onRefreshButtonpressed: function( evt ) {
+	    this.refreshRegisterTable();
+	},
+
+	onRegTableDataReceived: function( evt ) {
+		var count = evt.getParameter('data');
+		count = count.__count;
+	    this.byId('regTableText').setText("Total " + count + " registrations");
+	},
+	
 	refreshRegisterTable: function( evt ) {
 	    this.oRegTable.bindRows({
 				path: "/Registrations",
 				// sorter: [new sap.ui.model.Sorter("Status")],
-				filters: [new sap.ui.model.Filter("ProjectId", 'EQ', this.projectId)]
+				filters: [new sap.ui.model.Filter("ProjectId", 'EQ', this.projectId)],
+				events: {
+					dataReceived: this.onRegTableDataReceived.bind(this)
+				}
 		});
 
 		this.onRegistrationTableRowSelectChanged();

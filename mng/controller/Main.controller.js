@@ -136,35 +136,63 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 
 	//now need assign the missed property, each time only need set the missed one 
 	assignPropertyToFormCfg: function( ) {
-		//
-		var count  = 19; //now 20 free attr
+		var i, attrCount  = 20, attachmentCount = 5;
+
 		var aFreeAttr = [];
-	    for (var i=0; i < count; i++) {
+	    for (i=0; i < attrCount; i++) {
 	    	aFreeAttr.push(true);
 	    }
 
+	    var aFreeAttachment = [];
+		for (i=0; i < attachmentCount; i++) {
+	    	aFreeAttachment.push(true);
+	    }		
+
 	    //for the attachment, now use FileName, can use same ??
-
-	    //first loop just find which AttrXX has used, to create the real mapping
+		
+		var property, idx, freeIdx;
+	    //first loop just find which AttrXX FileNamexx has used, to create the real mapping
 	    for ( i=0; i < this.aFormCfg.length; i++) {
-	    	var property = this.aFormCfg[i].property;
-	    	if ( property  && property.indexOf('Attr') == 0) {
-	    		//by the index can know which one taken
-	    		var idx = property.substr(4);
-	    		idx = parseInt(idx);
+	    	property = this.aFormCfg[i].property;
+	    	if (!property)
+	    		continue;
 
+	    	if ( property.indexOf('Attr') == 0) {
+	    		//by the index can know which one taken
+	    		idx = property.substr(4);
+	    		idx = parseInt(idx);
 	    		aFreeAttr[idx] = false;
+	    	} else if (property.indexOf('FileName') == 0) {
+				idx = property.substr(8);
+	    		idx = parseInt(idx);
+	    		aFreeAttachment[idx] = false;
 	    	}
 	    }
 
 	    //then just find the empty property and assign
 	    for ( i=0; i < this.aFormCfg.length; i++) {
-	    	property = this.aFormCfg[i].property;
+	    	var cfg = this.aFormCfg[i];
+	    	property = cfg.property;
 	    	var foundIdx = "";
-
-	    	if (!property) {
-
-	    		for (var freeIdx =0; freeIdx < count; freeIdx++) {
+	    	if (property)
+	    		continue;
+	    	
+    		//attachment 
+    		if ( cfg.type == Enum.ControlType.Attachment) {
+				for (freeIdx =0; freeIdx < attachmentCount; freeIdx++) {
+	    			if ( aFreeAttachment[ freeIdx]) {
+	    				aFreeAttachment[ freeIdx] = false;
+	    				foundIdx = freeIdx;
+	    				break;
+	    			}
+	    		}
+	    		if (foundIdx === "") {
+	    			alert("Now support the maximum attachment is 5. Any doubt please contact Lucky Li");
+	    			return false;
+	    		}
+	    		this.aFormCfg[i].property = 'FileName' + foundIdx;
+    		} else {
+	    		for (freeIdx =0; freeIdx < attrCount; freeIdx++) {
 	    			if ( aFreeAttr[ freeIdx]) {
 	    				aFreeAttr[ freeIdx] = false;
 	    				foundIdx = freeIdx;
@@ -172,11 +200,13 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    			}
 	    		}
 	    		if (foundIdx === "") {
-	    			alert("Don't have enough attribute, please contact Lucky Li");
+	    			alert("Now support the maximum customized attribute is 20. Any doubt please contact Lucky Li");
+	    			return false;
 	    		}
 	    		this.aFormCfg[i].property = 'Attr' + foundIdx;
 	    	}
 	    }
+	    return true;
 	},
 	
 	onSavePressed: function( evt ) {
@@ -222,7 +252,12 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		//??why need use string
 		mData.MaxNum = "" + mData.MaxNum;
 
-		this.assignPropertyToFormCfg();
+		//!!later we can check it during the operation, now just check it when save
+		var ret = this.assignPropertyToFormCfg();
+		if (!ret) {
+			return;
+		}
+
 		mData.Form = JSON.stringify( this.aFormCfg);
 
 	    if (bCreate) {
@@ -280,7 +315,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		var newHref = "";
 		if ( href.indexOf("siteId=") != -1) {
 			var root = Config.getConfigure().Ui5RootUrl;
-			newHref = root + "/" + newApp + "/index.html"
+			newHref = root + "/" + newApp + "/index.html";
 		} else {
 			newHref = href.replace('/mng/',  '/' + newApp + '/');
 		}
@@ -381,7 +416,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	},
 
 	onRowAddPressed: function( evt ) {
-		var item = {property: '', type: 'Input', label: '', tooltip: '', candidate:''};
+		var item = {mandatory: true, property: '', type: 'Input', label: '', tooltip: '', candidate:''};
 		this.aFormCfg.push( item );
 	    this.oFormModel.setData(this.aFormCfg);
 	},
