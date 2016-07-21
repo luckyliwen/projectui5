@@ -2,6 +2,7 @@ var gf,gc,gm, gsel;
 sap.ui.define([
 	"csr/lib/BaseController",
 	"sap/ui/layout/form/SimpleForm",
+	"sap/ui/unified/FileUploaderParameter",
 	"sap/ui/model/json/JSONModel",
 	"csr/lib/Enum",
 	"csr/lib/Config",

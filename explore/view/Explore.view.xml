@@ -5,7 +5,7 @@
 <App>
 <pages>
     <Page   title="Coperator Social Responsibility Tool"
-        titleLevel="H2" class="sapUiSizeCompact">
+        titleLevel="H2" class="sapUiSizeCompact"  enableScrolling="false">
         <content>
 
     <table:Table id="registrationTable"

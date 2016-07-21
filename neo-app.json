@@ -1,7 +1,8 @@
 {
 	
 	"welcomeFile": "register/index.html",
-	
+	"authenticationMethod": "saml",
+  	"sendWelcomeFileRedirect": true,
 	"routes": [{
 			"path": "/resources",
 			"target": {
@@ -33,6 +34,15 @@
 		},
 
 		{
+			"path": "/attachmentUrl/",
+			"target": {
+				"type": "destination",
+				"name": "attachmentUrl",
+			},
+			"description": "Url for upload/download attachment"
+		},
+
+		{
 			"path": "/sap/ui5/1/resources/odata/projectodataSrv",
 			"target": {
 				"type": "destination",
@@ -40,6 +50,14 @@
 				"entryPath": "/ODataSrv"
 			},
 			"description": "projectodata Srv"
+		},
+		{
+			"path": "/sap/ui5/1/resources/attachmentUrl",
+			"target": {
+				"type": "destination",
+				"name": "attachmentUrl",
+			},
+			"description": "Url for upload/download attachment"
 		}
 	],
 	"cacheControl": [{
