@@ -34,7 +34,7 @@
 		},
 
 		{
-			"path": "/attachmentUrl/",
+			"path": "/attachmentUrl",
 			"target": {
 				"type": "destination",
 				"name": "attachmentUrl"
