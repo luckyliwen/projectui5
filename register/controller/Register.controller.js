@@ -484,7 +484,6 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
  			oUploader.setUploadUrl(url);
 
  			//also set the slug ?? 
-			FileUploaderParameter
 
  			oUploader.upload();
  			//clear flag 
