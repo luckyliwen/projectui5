@@ -37,7 +37,7 @@
 			"path": "/attachmentUrl/",
 			"target": {
 				"type": "destination",
-				"name": "attachmentUrl",
+				"name": "attachmentUrl"
 			},
 			"description": "Url for upload/download attachment"
 		},
@@ -55,7 +55,7 @@
 			"path": "/sap/ui5/1/resources/attachmentUrl",
 			"target": {
 				"type": "destination",
-				"name": "attachmentUrl",
+				"name": "attachmentUrl"
 			},
 			"description": "Url for upload/download attachment"
 		}
