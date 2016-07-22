@@ -1,6 +1,4 @@
 {
-	
-	"welcomeFile": "register/index.html",
 	"authenticationMethod": "saml",
   	"sendWelcomeFileRedirect": true,
 	"routes": [{
