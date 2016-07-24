@@ -1,6 +1,5 @@
 {
-	"authenticationMethod": "saml",
-  	"sendWelcomeFileRedirect": true,
+
 	"routes": [{
 			"path": "/resources",
 			"target": {
