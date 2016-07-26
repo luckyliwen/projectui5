@@ -4,12 +4,11 @@
     xmlns:core="sap.ui.core" class="sapUiSizeCompact">
 <App>
 <pages>
-    <Page   title="Coperator Social Responsibility Tool"
+    <Page   title="Coperator Social Responsibility Tool"  enableScrolling="false"
         titleLevel="H2" class="sapUiSizeCompact" >
         <content>
-
-    <table:Table id="registrationTable"
-        visibleRowCount="25"  showColumnVisibilityMenu="true"
+    <table:Table id="registrationTable"  visibleRowCount="20"
+        showColumnVisibilityMenu="true"
         selectionMode="MultiToggle"
         rowSelectionChange="onRegistrationTableRowSelectChanged">
  <table:toolbar>
@@ -17,7 +16,10 @@
                 <content>
                     <Title id="regTableText" />
                     <ToolbarSpacer />
+                    <Title text="Tips: Press table column head for sort, filter... " />
+                    <ToolbarSpacer />
                     <Button
+                        text="Fresh"
                         id="freshTable"
                         icon="sap-icon://refresh"
                         press="onRefreshButtonpressed">
@@ -32,7 +34,7 @@
             </Toolbar>
         </table:toolbar> -->
     </table:Table>
-            
+
         </content>
         <footer>
             <Bar>
@@ -59,7 +61,14 @@
                         id="rejectBtn"
                         press="onApproveRejectPressed">
                     </Button>
-                      <Button  id="emailBtn"  enabled="false"  
+
+                    <Button  id="downloadBtn"  visible = "false"  
+                        text="Download Attachment"
+                        icon="sap-icon://download"
+                        press="onDownloadPressed">
+                    </Button>
+
+                    <Button  id="emailBtn"  enabled="false"  
                         text="Send Email"
                         icon="sap-icon://email"
                         press="onSendEmailPressed">

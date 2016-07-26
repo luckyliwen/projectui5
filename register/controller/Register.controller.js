@@ -13,7 +13,8 @@ sap.ui.define([
 var ControllerController = BaseController.extend("csr.register.controller.Register", {
 	onInit:function() {
 		BaseController.prototype.onInit.call(this);
-
+		this.checkProjectId();
+		
 		gc = this; 
 
 		this.oDataModel = this.getModel('odata');

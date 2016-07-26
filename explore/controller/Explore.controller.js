@@ -11,6 +11,9 @@ sap.ui.define([
 var ControllerController = BaseController.extend("csr.explore.controller.Explore", {
 	onInit:function() {
 		BaseController.prototype.onInit.call(this);
+		if ( !this.checkProjectId()) {
+			return;
+		}
 
 		jQuery.sap.require("sap.ui.table.Table");
 		jQuery.sap.require("sap.ui.table.Column");
@@ -116,12 +119,12 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    //label: '', tooltip: '', property: '' mandatory: true, type: [input, date, list,attachment], candidate: ['male', 'famel'] 
 		//the UserId, SapUserName always need add , just add two cfg to the global aFromCfg
 		this.aFormCfg.unshift({property: 'Status', label: 'Status', tooltip: "Status"});
-		this.aFormCfg.unshift({property: 'SapUserName', label: 'SAP user name', tooltip: "SAP User name get from system"});
+		this.aFormCfg.unshift({property: 'SapUserName', label: 'SAP user name', tooltip: "SAP User name get from system", notVisible: true});
 		this.aFormCfg.unshift({property: 'UserId', label: 'SAP user ID', tooltip: "SAP User ID get from system"});
 		this.aFormCfg.unshift({property: 'SubmittedTime', label: 'Submitted Time', tooltip: "Submitted Time"});
 		
 
-		//if support multiple entry, then add that so can easy know who create multiple entry
+		// if support multiple entry, then add that so can easy know who create multiple entry
 		if ( this.projectCfg.MultipleEntry) {
 			this.aFormCfg.unshift({property: 'EntriesCount', label: 'Entries Count', 
 				tooltip: "How many items for one employee, for example register 2 activity for 2 children"});
@@ -140,9 +143,15 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 			if (cfg.type != Enum.ControlType.Attachment) {
 				if ( cfg.property == "SubmittedTime") {
 					template =  new sap.m.Text(
-						{ text: { path: cfg.property, formatter: Util.fmtTime} });
+						{ text: { path: cfg.property, formatter: Util.fmtTime}, maxLines:1 });
 				} else {
-					template =  new sap.m.Text({text: path });
+					template =  new sap.m.Text({
+						text: path,  maxLines:1, 
+						tooltip: {
+							path: cfg.property,  
+							formatter:  Util.fmtString
+						}
+					});
 				}
 			} else {
 				template = new sap.m.Link({
@@ -157,6 +166,10 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 				sortProperty: cfg.property,
 				filterProperty:  cfg.property
 			});
+
+			if (cfg.notVisible) {
+				col.setVisible(false);
+			}
 
 			this.oRegTable.addColumn( col );
 		}
@@ -189,13 +202,28 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	
 	
 	adjustViewByRoleAndConfigure: function( ) {
+	    //!! need check whether he has the admin role or belong to the administrator group
 	    if (this.bAdmin) {
 	    	this.byId("deleteBtn").setVisible(true);
 	    	if ( this.projectCfg.NeedAprrove) {
 	    		this.byId("approveBtn").setVisible(true);
 	    		this.byId("rejectBtn").setVisible(true);
-	    	}  
+	    	}
+
+	    	//check if have one form is attachment  
+	    	if (this.aFormCfg && this.aFormCfg.length){
+	    		var bHasAttachment = false;
+	    		for (var i=0; i < this.aFormCfg.length; i++) {
+	    			if ( this.aFormCfg[i].type == Enum.ControlType.Attachment) {
+	    				bHasAttachment = true;
+	    				break;
+	    			}
+	    		}
+	    		this.byId("downloadBtn").setVisible(bHasAttachment);
+	    	}
 	    } 
+
+	    
 	},
 	
 	
@@ -356,6 +384,34 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		this.setBusy(true);
 	},
 	
+	onDownloadPressed: function( evt ) {
+	    	/*As we need pass a lot of parameter, so we need use Json as format
+	 * FileName: zip file name
+	 * MultipleEntry: true/false  if false then we can directly use userid as the file prefix 
+	 * AttachmentCountPerUser:   if 1 then no need extra for the identify different file one user
+	 * ProjectId:  as all share same project id, so we can just pass once
+	 * Attachments: [
+	 *     {UserId: '', entryId, Type: '' }  (Type if more than one, then separate it by ;   
+	 * ]
+	 * How to define the file name for one attachment:
+	 *    1:  UserId +
+	 *    2:  If MultipleEntry = false,  then no need the entryId. Otherwise, add the entryId (as we don't know it is what part)
+	 *    3:  If AttachmentCountPerUser =1, then no need add the type, otherwise just get the last part(0~4) of the type
+	 *    4:  last is the mine
+	 */
+		var mParam = {
+			"FileName": "1~10.zip", "MultipleEntry":"true", "AttachmentCountPerUser":"1", "ProjectId": "1",
+			Attachments: [
+				{UserId: 'I068108', EntryId:"1",Type:'FileName0'},
+				{UserId: 'I068109', EntryId:"2",Type:'FileName0'},
+			]
+		};
+
+// {"FileName": "1~10.zip", "MultipleEntry":"true", "AttachmentCountPerUser":"1", "ProjectId": "1",
+// "[{"UserId":"I068108","EntryId":"1","Type":"FileName0"},{"UserId":"I068109","EntryId":"2","Type":"FileName0"}]"
+
+	},
+	
 
 	onSendEmailPressed : function( evt ) {
 		if (!this.oSendEmailDialog) {
@@ -395,7 +451,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 
 	onTableExportPressed: function( evt ) {
 		var table = this.byId("registrationTable");
-	    Util.exportTableContent(table, "Registration.csv");
+	    Util.exportTableContent(table, "Registration.csv", this.projectId);
 	},
 
 	
