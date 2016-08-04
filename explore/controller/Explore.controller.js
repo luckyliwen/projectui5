@@ -27,6 +27,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		//global variables
 		this.projectCfg = null;
 		this.bAdmin = false;
+		this.userId = "";
 
 		this.getProjectConfigure();
 
@@ -78,7 +79,17 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		function onGetUserInfoSuccess( oData) {
 			if (oData) {
 				that.bAdmin = oData.Admin;
+				that.userId = oData.UserId;
+				if ( !that.bAdmin) {
+					//if user is the author of project or inside the Administrator then also have the admin right 
+					if (that.userId == that.projectCfg.Author) {
+						that.bAdmin = true;
+					} else if (that.projectCfg.Administrator && that.projectCfg.Administrator.indexOf(that.userId) != -1) {
+						that.bAdmin = true;
+					}
+				}
 				that.adjustViewByRoleAndConfigure();
+				that.tryLoadRegistration();
 			}
 		}
 		
@@ -174,7 +185,6 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 			this.oRegTable.addColumn( col );
 		}
 
-		this.refreshRegisterTable();
 	},
 	
 	onRefreshButtonpressed: function( evt ) {
@@ -200,6 +210,50 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		this.onRegistrationTableRowSelectChanged();
 	},
 	
+	getMyRegistration: function(  ) {
+	    var that = this;
+
+		function onGetMyRegistrationSuccess(oData) {
+			that.setBusy(false);
+			if (oData.results.length >0) {
+				that.refreshRegisterTable();
+			} else {
+				Util.info("The registration is protected, only all the registers can see it!");
+				return;
+			}
+		}
+
+		function onGetMyRegistrationError(error) {
+			that.setBusy(false);
+			Util.showError("Failed to get your registration." + Enum.GeneralSolution, error);
+		}
+
+	    this.oDataModel.read("/Registrations", {
+	    	filters: [	new sap.ui.model.Filter("ProjectId", 'EQ', this.projectId),
+	    			new sap.ui.model.Filter("UserId", 'EQ', this.userId)
+	    		],
+			success: onGetMyRegistrationSuccess,
+			error: onGetMyRegistrationError
+		});
+
+		this.setBusy(true);
+	},
+
+	tryLoadRegistration: function() {
+		if ( !this.bAdmin ) {
+			if ( this.projectCfg.RegistrationSecurity == Enum.RegistrationSecurity.Public) {
+				this.refreshRegisterTable();		
+			} if ( this.projectCfg.RegistrationSecurity == Enum.RegistrationSecurity.Protected) {
+				//then need check whether he has the registration information or not 
+				this.getMyRegistration();
+			} else if (this.projectCfg.RegistrationSecurity == Enum.RegistrationSecurity.Private) {
+				Util.info("The registration information is private, only administrator can see it.");
+				return;
+			}
+		} else {
+			this.refreshRegisterTable();	
+		}
+	},
 	
 	adjustViewByRoleAndConfigure: function( ) {
 	    //!! need check whether he has the admin role or belong to the administrator group

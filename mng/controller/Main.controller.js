@@ -12,6 +12,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	onInit:function() {
 		BaseController.prototype.onInit.call(this);
 		
+		this.userId = "";
 		this.oDataModel = this.getModel();
 		this.oDataModel.setUseBatch(false);
 
@@ -20,9 +21,10 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		
 		this.oProjectModel = new sap.ui.model.json.JSONModel();
 		this.projectCfg = this.getDefaultProjectCfg();
+
 		this.oProjectModel.setData( this.projectCfg);
 		this.oProjectModel.setDefaultBindingMode("TwoWay");
-		this.byId("projectForm").setModel(this.oProjectModel);
+		this.byId("detailPage").setModel(this.oProjectModel);
 
 		this.oTable = this.byId("formTable");
 		this.oFormModel = new sap.ui.model.json.JSONModel();
@@ -31,7 +33,18 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		this.oFormModel.setData( this.aFormCfg);
 		this.byId("formTable").setModel(this.oFormModel);
 
+		//create a globlal model to control edit/display model 
+		this.mGlobal  = {
+			bOwner: true
+		};
+		this.oGlobalModel = new sap.ui.model.json.JSONModel(this.mGlobal);
+		// this.byId("detailPage").setModel(this.oGlobalModel, 'g');	//g means global, for easy write in xml	
+		// this.byId("formTable").setModel(this.oGlobalModel, 'g');
+		this.oDetailPage.setModel(this.oGlobalModel, 'g');
+
 		this.initList();
+		this.getUserInfo();
+
 		//??
 		gc = this; 
 		gt = this.oTable;
@@ -45,18 +58,79 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	return false;
 	},
 	
+	onMyOrOtherSegmentSelected: function( evt ) {
+	    this.freshList();
+	},
+
+	getUserInfo: function(  ) {
+		var that = this;
+		function onGetUserInfoSuccess( oData) {
+			if (oData) {
+				that.userId = oData.UserId;
+				that.freshList();
+			}
+		}
+		
+	    function onGetUserInfoError(error) {
+			Util.showError("Failed to call GetUserInfo." + Enum.GeneralSolution, error);
+		}
+
+	    this.oDataModel.callFunction("/GetUserInfo", {
+			method: "GET",
+			success: onGetUserInfoSuccess,
+			error: onGetUserInfoError
+		});
+	},
 
 	initList: function( evt ) {
 		this.listItemTemplate = this.oList.removeAllItems()[0];
-		this.freshList();
+		// this.freshList();
 		// items ="{/Projects}"
 	    //as we need refresh it, so we need create template  for it;
 	},
 	
-	freshList: function( evt ) {
+	freshList_old: function( evt ) {
 	    this.oList.bindItems("/Projects", this.listItemTemplate);
 	},
+
+	isMyProjectSegmentSelected: function( evt ) {
+	    var key = this.byId("segmentBtn").getSelectedButton();
+	    if (key.indexOf("mySegment") != -1)
+	    	return true;
+	    else 
+	    	return false;
+	},
 	
+
+	freshList: function( ) {
+		var aFilter = [];
+
+		if ( this.isMyProjectSegmentSelected()) {
+			aFilter.push( new sap.ui.model.Filter({
+		 	  		filters: [
+		 	  			new sap.ui.model.Filter("Author", 'EQ', this.userId),
+		 	  			new sap.ui.model.Filter("Administrator", 'Contains', this.userId)
+		 	  		],
+		 	    	and: false
+		 	    }) );
+		} else {
+			//!! later need find a way in UI5 to support substringof('I068108', Administrator) eq false
+			aFilter.push( new sap.ui.model.Filter("ProjectPublic", 'EQ', true) );
+			var subFilter = new sap.ui.model.Filter({
+	 	  		filters: [
+	 	  			new sap.ui.model.Filter("Author", 'NE', this.userId)
+	 	  		],
+	 	    	and: true
+	 	    });
+			aFilter.push( subFilter); 
+		}
+			
+		this.oList.bindItems({
+	    	path: "/Projects",
+	    	filters: aFilter,
+	    	template: this.listItemTemplate
+		} );
+	},
 	
 
 	fmtProjectId: function( id ) {
@@ -65,10 +139,15 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	
 	getDefaultProjectCfg: function() {
 	    return {
+	    	Author: this.userId,
 	    	AllowCancel: false,  Deadline: "",   Description: "",
 	    	DisplayProjectInfoAtTop: true,    Form: "",
 	    	Link: "",   MaxNum: 0,   MultipleEntry: false,  Title: "",
-	    	ProjectId: ''
+	    	ProjectId: '', 
+	    	ProjectPublic: true,
+	    	RegistrationSecurity: 'Public', 
+	    	bOwner: true,
+	    	NeedEmailNotification: false
 	    };
 	},
 
@@ -476,6 +555,19 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    if (selItem) {
 	    	var binding = selItem.getBindingContext();
 	    	this.projectCfg = binding.getProperty();
+	    	//add missed property if not set NeedEmailNotification
+	    	if ( !("NeedEmailNotification" in this.projectCfg)) {
+	    		this.projectCfg.NeedEmailNotification = false;
+	    	}
+
+	    	var bOwner = false;
+	    	if (this.userId == this.projectCfg.Author) {
+				bOwner = true;
+			} else if (this.projectCfg.Administrator && this.projectCfg.Administrator.indexOf(this.userId) != -1) {
+				bOwner = true;
+			} 
+
+			this.oGlobalModel.setProperty('/bOwner', bOwner)
 
 	    	this.oProjectModel.setData( this.projectCfg);
 	    	this.setDetailPageTitle();

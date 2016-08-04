@@ -13,6 +13,22 @@
                         search="onListSearchPressed"
                         liveChange="onListSearchLiveChanged">
                     </SearchField>
+
+                    <SegmentedButton  id="segmentBtn"  selectedKey=""
+                        width="100%"
+                        select="onMyOrOtherSegmentSelected">
+                        <buttons>
+                            <Button
+                                text="My Projects" tooltip="You created or has administrator permission"
+                                id="mySegment">
+                            </Button>
+                            <Button
+                                text="Others"  tooltip="Other public project"
+                                id="otherSegment">
+                            </Button>
+                        </buttons>
+                    </SegmentedButton>
+
                     <List
                         growing="true"  growingThreshold="50"
                         id="projectList"

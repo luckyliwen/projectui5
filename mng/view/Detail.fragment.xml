@@ -12,6 +12,7 @@
  <IconTabBar>
         <items>
             <IconTabFilter
+                key="mainIconTab"
                 icon="sap-icon://activity-individual"
                 text="Project Information">
                 <content>
@@ -21,43 +22,69 @@
                           labelSpanM="4"
                          >
                         <form:content>
-                                <Label text="Title"  required="true" tooltip=""/>
-                                <Input value="{/Title}"  />
+                            <core:Title text="General" />
+                                <Label text="Author"  required="true" />
+                                <Input value="{/Author}"  enabled="false" />
+
+                                <Label text="Title"  required="true" tooltip="Brief introduct of the project"/>
+                                <Input value="{/Title}"  enabled="{g>/bOwner}" />
                                 
                                 <Label text="Description" tooltip="Long description of the project, normally include time, venue..."/>
-                                <TextArea rows="2" value="{/Description}" /> 
+                                <TextArea rows="2" value="{/Description}" enabled="{g>/bOwner}"/> 
 
                                 <Label text="Link"  tooltip="URL which provide extra information"/>
-                                <Input value="{/Link}"  />
+                                <Input value="{/Link}"  enabled="{g>/bOwner}"/>
+
+                                <Label text="Form download URL"  tooltip="The URL of form downloading, only need if employee need upload some form "/>
+                                <Input value="{/FormDownloadUrl}"  enabled="{g>/bOwner}"/>
 
                                 <Label text="Support Multiple Entries" 
                                     tooltip="One employee can create multiple entries, like the kid@sap one parent can register multiple children "/>
-                                <CheckBox selected="{/MultipleEntry}" />
+                                <CheckBox selected="{/MultipleEntry}" text="If checked, one employee can create multiple entries" 
+                                    enabled="{g>/bOwner}"/>
 
                                 <Label text="Display Project Information at the top of form" 
                                     tooltip="If not checked, then user need click button to show project information"/>
-                                <CheckBox selected="{/DisplayProjectInfoAtTop}" />
+                                <CheckBox selected="{/DisplayProjectInfoAtTop}" text="If checked, employee can see project at the top" 
+                                    enabled="{g>/bOwner}"/>
 
                                 <Label text="Deadline" tooltip="The deadline which employee must finish"/>
-                                <Input value="{/Deadline}"  /> 
+                                <Input value="{/Deadline}"  enabled="{g>/bOwner}"/> 
 
                                 <Label text="Maximum Registration Number" tooltip="The maximum number of administrator can approve"/>
-                                <Input value="{/MaxNum}"  /> 
-
+                                <Input value="{/MaxNum}"  enabled="{g>/bOwner}"/> 
 
                                 <Label text="Need Approve Process" tooltip=""/>
-                                <CheckBox selected="{/NeedAprrove}" />
+                                <CheckBox selected="{/NeedAprrove}" text="If needed, you can design Email Notify also"
+                                    enabled="{g>/bOwner}"/>
 
-                                <Label text="Allow cancel myself" tooltip=""/>
-                                <CheckBox selected="{/AllowCancel}" />
+                                <Label text="Allow cancel myself" tooltip="" visible="{/NeedAprrove}" />
+                                <CheckBox selected="{/AllowCancel}" visible="{/NeedAprrove}" 
+                                    enabled="{g>/bOwner}"/>
 
-                              <!--   <Label text="Form download URL"  tooltip="The URL of form downloading "/>
-                                <Input value="{/FormDownloadUrl}"  /> -->
+                            <core:Title text="Security" />
+                                <Label text="Administrator" tooltip="The people can manage the project"/>
+                                <TextArea rows="2" value="{/Administrator}" placeholder="Seperate ID by ; or space" 
+                                    enabled="{g>/bOwner}"/> 
+
+                                <Label text="Project Public" />
+                                <CheckBox id="checkBoxProjectPublic" selected="{/ProjectPublic}" 
+                                    text="Control who can see the registrator information" 
+                                    enabled="{g>/bOwner}"/>
+
+                                <Label text="Registration Security" />
+                                <Select selectedKey="{/RegistrationSecurity}"  enabled="{g>/bOwner}">
+                                    <core:Item  key="Public"  text="Public -- All employee can see" />
+                                    <core:Item  key="Protected"  text="Protected -- Only register can see" />
+                                    <core:Item  key="Private"  text="Private  -- Only administrator can see" />
+                                </Select>
+
                             </form:content>
                         </form:SimpleForm>
                     </content>
             </IconTabFilter>
             <IconTabFilter
+                key="formIconTab"
                 text="Form Design"
                 icon="sap-icon://form">
                 <content>
@@ -68,7 +95,7 @@
         id="formTable"
         rows="{/}">
          <table:toolbar>
-            <Toolbar>
+            <Toolbar id="formTableToolbar" visible="{g>/bOwner}">
                 <content>
                      <Button  
                         text="Add Common Items"
@@ -131,7 +158,7 @@
                     <Label text="Mandatory" tooltip="Mandatory"/>
                 </table:label>
                 <table:template>
-                    <CheckBox selected="{mandatory}" />
+                    <CheckBox selected="{mandatory}" enabled="{g>/bOwner}"/>
                 </table:template>
             </table:Column>
 
@@ -140,7 +167,7 @@
                     <Label text="type" /> 
                 </table:label>
                 <table:template>
-                    <Select selectedKey="{type}">
+                    <Select selectedKey="{type}"  enabled="{g>/bOwner}">
                         <core:Item  key="Input"  text="Input" />
                         <core:Item  key="Date"  text="Date" />
                         <core:Item  key="List"  text="List" />
@@ -157,7 +184,7 @@
                     <Label text="Label" /> 
                 </table:label>
                 <table:template>
-                    <Input value="{label}" />
+                    <Input value="{label}" enabled="{g>/bOwner}"/>
                 </table:template>
             </table:Column>
 
@@ -166,7 +193,7 @@
                     <Label text="Tooltip" tooltip="Inut some explan information to help user how to fill" /> 
                 </table:label>
                 <table:template>
-                    <Input value="{tooltip}" />
+                    <Input value="{tooltip}" enabled="{g>/bOwner}"/>
                 </table:template>
             </table:Column>
 
@@ -176,7 +203,7 @@
                         tooltip="Only need when type is List. Seperate it by ;"/> 
                 </table:label>
                 <table:template>
-                    <Input value="{candidate}" visible="{path: 'type', formatter: '.fmtCandidate'}"/>
+                    <Input value="{candidate}" visible="{path: 'type', formatter: '.fmtCandidate'}" enabled="{g>/bOwner}"/>
                 </table:template>
             </table:Column>
             
@@ -185,6 +212,55 @@
 
 
                 </content>
+            </IconTabFilter>
+            <IconTabFilter
+                key="emailIconTab"
+                text="Email Notifycation"
+                icon="sap-icon://email"
+                visible="{/NeedAprrove}">
+
+                <Toolbar id="emailToolbar" visible="{g>/bOwner}">
+                    <ToolbarSpacer />
+                    <Button  
+                        text="Load Default Content"
+                        tooltip="Choose default email template"
+                        type="Emphasized"
+                        press="onLoadDefaultContetPressed"
+                        enabled="{/NeedEmailNotification}">
+                    </Button>
+                    <ToolbarSpacer />
+                </Toolbar>
+
+                <form:SimpleForm id="emailForm" 
+                      layout="ResponsiveGridLayout" 
+                      labelSpanL="4"
+                      labelSpanM="4"
+                     >
+                    <form:content>
+                        <Label text="Email notification for approve/reject" required="true"/>
+                        <CheckBox selected="{/NeedEmailNotification}" text="If checked, employee will receive email for approve/reject" 
+                                    enabled="{g>/bOwner}"/>
+
+                        <Label text="Signature"  required="true" visible="{/NeedEmailNotification}" tooltip="Email Signature"/>
+                        <Input value="{/EmailSignature}"   visible="{/NeedEmailNotification}" enabled="{g>/bOwner}"/>
+
+                        <Label text="Approve Subject"  required="true" visible="{/NeedEmailNotification}" 
+                            tooltip="Subject used for approve registration"/>
+                        <Input value="{/EmailApproveSubject}" visible="{/NeedEmailNotification}"  enabled="{g>/bOwner}"/>
+
+                        <Label text="Approve Body"  required="true" tooltip="Content for approve registration"
+                            visible="{/NeedEmailNotification}"/>
+                        <TextArea rows="3" value="{/EmailApproveBody}" visible="{/NeedEmailNotification}" enabled="{g>/bOwner}"/> 
+
+                        <Label text="Reject Subject"  required="true" 
+                            tooltip="Subject used for Reject registration" visible="{/NeedEmailNotification}"/>
+                        <Input value="{/EmailRejectSubject}"   visible="{/NeedEmailNotification}"/>
+
+                        <Label text="Approve Body"  required="true" tooltip="Content for reject registration"
+                            visible="{/NeedEmailNotification}"/>
+                        <TextArea rows="3" value="{/Description}" enabled="{g>/bOwner}" visible="{/NeedEmailNotification}"/> 
+                    </form:content>
+                </form:SimpleForm>
             </IconTabFilter>
         </items>
     </IconTabBar>
@@ -198,6 +274,7 @@
                         icon="sap-icon://save"
                         id="saveBtn"
                         press="onSavePressed"
+                        visible="{g>/bOwner}"
                         >
                     </Button>
 
@@ -206,6 +283,7 @@
                         icon="sap-icon://delete"
                         id="deleteBtn"
                         press="onDeletePressed"
+                        visible="{g>/bOwner}"
                         />
                     <Button
                         text="Duplicate"
