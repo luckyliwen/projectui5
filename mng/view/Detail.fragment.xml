@@ -145,7 +145,9 @@
                         <core:Item  key="Date"  text="Date" />
                         <core:Item  key="List"  text="List" />
                         <core:Item  key="Attachment"  text="Attachment" />
-
+                        <core:Item  key="Number"  text="Number" />
+                        <core:Item  key="Check"  text="CheckBox" />
+                        <core:Item  key="Radio"  text="Radio Button" />
                     </Select>
                 </table:template>
             </table:Column>

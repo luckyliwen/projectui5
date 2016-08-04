@@ -39,7 +39,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	},
 
 	fmtCandidate: function(type) {
-	    if (type == 'List')
+	    if (type == 'List' || type == 'Radio')
 	    	return true;
 	    else
 	    	return false;
