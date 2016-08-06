@@ -45,7 +45,13 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		this.initList();
 		this.getUserInfo();
 
-		//??
+		//the sub-project limitation
+		this.aSubProject = null;
+		this.oSubProjectModel = new sap.ui.model.json.JSONModel(this.aSubProject);
+		
+		//other init work 
+		this.byId("emailTemplateTips").setValue( Config.getConfigure().EmailTemplateTips);
+
 		gc = this; 
 		gt = this.oTable;
 		gl = this.oList;
@@ -102,7 +108,12 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	},
 	
 
-	freshList: function( ) {
+	/**
+	 * [freshList description]
+	 * @param  {[type]} bSelectCreatedProject: true means need select the new created project 
+	 * @return {[type]}                       [description]
+	 */
+	freshList: function(selectProjectId) {
 		var aFilter = [];
 
 		if ( this.isMyProjectSegmentSelected()) {
@@ -140,14 +151,15 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	getDefaultProjectCfg: function() {
 	    return {
 	    	Author: this.userId,
-	    	AllowCancel: false,  Deadline: "",   Description: "",
+	    	AllowCancel: true,  Deadline: "",   Description: "",
 	    	DisplayProjectInfoAtTop: true,    Form: "",
-	    	Link: "",   MaxNum: 0,   MultipleEntry: false,  Title: "",
+	    	Link: "",   MultipleEntry: false,  Title: "",
 	    	ProjectId: '', 
 	    	ProjectPublic: true,
 	    	RegistrationSecurity: 'Public', 
 	    	bOwner: true,
-	    	NeedEmailNotification: false
+	    	NeedEmailNotification: false,
+	    	RegistrationLimit_Ext: "No"
 	    };
 	},
 
@@ -182,6 +194,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 
 	    this.aFormCfg = []; 
 	    this.oFormModel.setData(this.aFormCfg);
+	    this.aSubProject = null;
 	},
 
 	onActionSheetButtonPressed: function( evt ) {
@@ -303,7 +316,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    		that.projectCfg.ProjectId = oData.ProjectId;
 	    		Util.showToast("Create new project with ID: " + oData.ProjectId + " success.");
 	    		//in this case, need update the right part list and set the selected item
-	    		that.freshList();
+	    		that.freshList(oData.ProjectId);
 	    	} else {
 	    		Util.showToast("Save project success.");
 	    	}
@@ -328,8 +341,17 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		delete mData.Author;
 		delete mData.ModifiedTime;
 		delete mData.__metadata;
-		//??why need use string
-		mData.MaxNum = "" + mData.MaxNum;
+		delete mData.bOwner;
+		delete mData.RegistrationLimit_Ext;
+		//all the Null property just ignore for performance 
+		for (var key in mData) {
+			if (mData[key] === null)
+				delete mData[key];
+		}
+
+		//limit need mapping, now olingo need use string format
+		mData.RegistrationLimit = "" + Util.mapRegistrationLimitToNumber(that.projectCfg.RegistrationLimit_Ext, 
+			that.projectCfg.RegistrationLimit);
 
 		//!!later we can check it during the operation, now just check it when save
 		var ret = this.assignPropertyToFormCfg();
@@ -346,7 +368,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	var url = "/Projects(" + this.projectCfg.ProjectId + "L)";
 	    	this.oDataModel.update(url, mData, mParam);
 	    }
-
+    	that.setBusy(true);
 	},
 
 	onDuplicatePressed: function( evt ) {
@@ -555,10 +577,14 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    if (selItem) {
 	    	var binding = selItem.getBindingContext();
 	    	this.projectCfg = binding.getProperty();
+
 	    	//add missed property if not set NeedEmailNotification
 	    	if ( !("NeedEmailNotification" in this.projectCfg)) {
 	    		this.projectCfg.NeedEmailNotification = false;
 	    	}
+	    	this.RegistrationLimit_Ext = Util.mapRegistrationLimitToEnum(this.RegistrationLimit);
+   		    this.aSubProject = null;
+
 
 	    	var bOwner = false;
 	    	if (this.userId == this.projectCfg.Author) {
@@ -566,8 +592,8 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 			} else if (this.projectCfg.Administrator && this.projectCfg.Administrator.indexOf(this.userId) != -1) {
 				bOwner = true;
 			} 
-
-			this.oGlobalModel.setProperty('/bOwner', bOwner)
+			//update the global flag to control readonly 
+			this.oGlobalModel.setProperty('/bOwner', bOwner);
 
 	    	this.oProjectModel.setData( this.projectCfg);
 	    	this.setDetailPageTitle();
@@ -582,10 +608,82 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    		}
 	    	}
 	    }
-	}
-});
+	},
 
-	//global data 
+	//=======================sub project part 
+	onSubProjectDefinePressed : function( evt ) {
+        if (!this.oSubProjectDlg) {
+            this.oSubProjectDlg = sap.ui.xmlfragment(this.getView().getId(), "csr.mng.view.SubProjectDialog", this);
+        	this.oSubProjectDlg.setModel(this.oSubProjectModel);
+        }
+
+        //mapping from string to array, only need when project changed or not do init
+        if ( this.aSubProject === null) {
+        	this.aSubProject = [];
+			if (this.projectCfg.subProjectInfo) {
+				var aInfo = this.projectCfg.subProjectInfo.split(";");
+				var aLimit = this.projectCfg.subProjectLimit.split("");
+				for (var i=0; i < aInfo.length; i++) {
+					this.aSubProject.push({
+						info: aInfo[i],
+						limit: aLimit[i]
+					});
+				}
+	        } else {
+	        	//just 3 default raw 
+	        	this.aSubProject= [
+	        		{info: "", limit: ""},
+	        		{info: "", limit: ""},
+	        		{info: "", limit: ""}
+	        	];
+	        }
+	        this.oSubProjectModel.setData( this.aSubProject);
+        }
+        this.oSubProjectDlg.open();
+	},
+	
+	onSubProjectOkButtonPressed: function( evt ) {
+    	//save them back
+    	var prjInfo = "", prjLimit = "";
+    	for (var i=0; i < this.aSubProject.length; i++) {
+    		prjInfo += this.aSubProject[i].info.trim() + ";";
+    		prjLimit += this.aSubProject[i].limit.trim() + ";";
+    	}
+		//remove the last extra ;
+		this.projectCfg.SubProjectInfo = prjInfo.substr(0, prjInfo.length -1);
+		this.projectCfg.SubProjectLimit = prjLimit.substr(0, prjLimit.length -1);
+        
+        this.oSubProjectDlg.close();
+	},
+
+	onSubProjectRowDeletePressed: function( evt ) {
+	    var btn = evt.getSource();
+	    var path = btn.getBindingContext().getPath();  // like '/2'
+	    var idx = parseInt( path.substr(1));
+	    this.aSubProject.splice(idx,1);
+        this.oSubProjectModel.setData( this.aSubProject);
+	},
+
+	onSubProjectRowAddPressed: function( evt ) {
+	    var btn = evt.getSource();
+	    var path = btn.getBindingContext().getPath();  // like '/2'
+	    var idx = parseInt( path.substr(1));
+	    this.aSubProject.splice(idx+1, 0, {info: "", limit: ''});
+        this.oSubProjectModel.setData( this.aSubProject);
+	},
+	
+
+	onSubProjectCancelButtonPressed: function( evt ) {
+        this.oSubProjectDlg.close();
+	},
+
+	onLoadDefaultEmailTemplatePressed: function( evt ) {
+	    var template = Config.getConfigure().DefaultEmailTemplate;
+	    for (var key in template) {
+	    	this.oProjectModel.setProperty("/" + key, template[key]);
+	    }
+	},
+});
 
 	return ControllerController;
 });
