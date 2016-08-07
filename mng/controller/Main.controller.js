@@ -446,7 +446,19 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		if ( header)
 			this.oPreviewDlg.addContent( header);
 
-		var form  = this.createRegisterForm( this.aFormCfg);
+		//depend on the sub-Project limit, need add the sub-project or not 
+		var aTmpForm = this.aFormCfg.concat();
+		if ( this.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject) {
+			//label: '', tooltip: '', property: '' mandatory: true, type: [input, date, list,attachment], candidate: ['male', 'famel'] 		
+			var subPrj = {
+				label: "Sub Project",  bSubProject: true, 
+				property: "SubProject",  mandatory: true,  type: Enum.ControlType.List
+			};
+			subPrj.candidate = this.projectCfg.SubProjectInfo;
+			aTmpForm.unshift(subPrj);
+		}
+
+		var form  = this.createRegisterForm(aTmpForm);
 		this.oPreviewDlg.addContent( form );
 
 	    this.oPreviewDlg.open();
@@ -582,7 +594,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	if ( !("NeedEmailNotification" in this.projectCfg)) {
 	    		this.projectCfg.NeedEmailNotification = false;
 	    	}
-	    	this.RegistrationLimit_Ext = Util.mapRegistrationLimitToEnum(this.RegistrationLimit);
+	    	this.projectCfg.RegistrationLimit_Ext = Util.mapRegistrationLimitToEnum(this.projectCfg.RegistrationLimit);
    		    this.aSubProject = null;
 
 
@@ -620,9 +632,9 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
         //mapping from string to array, only need when project changed or not do init
         if ( this.aSubProject === null) {
         	this.aSubProject = [];
-			if (this.projectCfg.subProjectInfo) {
-				var aInfo = this.projectCfg.subProjectInfo.split(";");
-				var aLimit = this.projectCfg.subProjectLimit.split("");
+			if (this.projectCfg.SubProjectInfo) {
+				var aInfo = this.projectCfg.SubProjectInfo.split(";");
+				var aLimit = this.projectCfg.SubProjectLimit.split(";");
 				for (var i=0; i < aInfo.length; i++) {
 					this.aSubProject.push({
 						info: aInfo[i],

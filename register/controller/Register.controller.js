@@ -87,8 +87,11 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	},
 
 	
-	
-
+	/**
+	 * Create the Register Screen according to the designed project
+	 * @param  {[type]} evt [description]
+	 * @return {[type]}     [description]
+	 */
 	createRegisterScreen: function( evt ) {
 	    var aFormCfg;
 		try {
@@ -96,6 +99,18 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		} catch (e) {
 			Util.showError("The project configure format error." + Enum.GeneralSolution);
 			return;
+		}
+		//if it has the sub-project limitation, then the first line is the sub-project selection, get from  
+		var limitEnum = Util.mapRegistrationLimitToEnum(this.projectCfg.RegistrationLimit);
+		this.projectCfg.RegistrationLimit_Ext = limitEnum;
+		if ( limitEnum == Enum.RegistrationLimit.SubProject) {
+			//label: '', tooltip: '', property: '' mandatory: true, type: [input, date, list,attachment], candidate: ['male', 'famel'] 		
+			var subPrj = {
+				label: "Sub Project",  bSubProject: true, 
+				property: "SubProject",  mandatory: true,  type: Enum.ControlType.List
+			};
+			subPrj.candidate = this.projectCfg.SubProjectInfo;
+			aFormCfg.unshift(subPrj);
 		}
 		this.aFormCfg = aFormCfg;
 
@@ -378,8 +393,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    	bCreate = false;
 	    }
 
-	    this.mRegister.Status = newStatus;
-
+	    //??this.mRegister.Status = newStatus;
 	    
 	    //for submit, need upload the attachment 
 	    var oldAction = action;
@@ -401,10 +415,13 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	        	}
 	        }
 
+	        //for sub-project, need control the enabled for sub-project selection
+	        that.oModel.setProperty("/Status", newStatus);
 	        that.uploadAttachments(btn, oldAction);
 	    }
 	    
 	    function onRegActionError(error) {
+	    	//!!how to know for the registration limit, user need enter to waiting list ??
 	    	that.setBusy(false);
 	    	that.onActionError(error, oldAction);
 	    }
@@ -418,6 +435,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    //as there are some extra data, so here need just get the required data 
 	    var mData = jQuery.extend({}, true, this.mRegister);
 		delete mData.EntriesCount;
+    	delete  mData.RegisterId;
 		
 	    //for the null value, need delete 
 	    for (var key in mData) {
@@ -431,10 +449,10 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    //for the new entry, need set the projectId 
 	    mData.ProjectId = this.projectId;
 
-	    //for the Age, need use the number
-	    if (mData.Age) {
-	    	mData.Age = parseInt(mData.Age);
-	    }
+	    //?? for the Age, need use the number, sometimes it still need use the string 
+	    // if (mData.Age) {
+	    // 	mData.Age = parseInt(mData.Age);
+	    // }
 
 	    console.error("!!create or update body",  JSON.stringify(mData));
 
