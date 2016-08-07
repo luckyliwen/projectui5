@@ -259,7 +259,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    //!! need check whether he has the admin role or belong to the administrator group
 	    if (this.bAdmin) {
 	    	this.byId("deleteBtn").setVisible(true);
-	    	if ( this.projectCfg.NeedAprrove) {
+	    	if ( this.projectCfg.NeedApprove) {
 	    		this.byId("approveBtn").setVisible(true);
 	    		this.byId("rejectBtn").setVisible(true);
 	    	}

@@ -8,7 +8,7 @@
 	xmlns="sap.m">
 	<App>
 		<pages>
-			<Page title='{parts:[ {path: "/Status"},{path:"/RejectReason"}], formatter: ".fmtPageTitle"}' id="registerPage">
+			<Page id="registerPage">
 				<content>
 			
 				</content>

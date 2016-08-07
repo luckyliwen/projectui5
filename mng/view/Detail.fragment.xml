@@ -70,11 +70,11 @@
                             </Button>
 
                                 <Label text="Need Approve Process" tooltip=""/>
-                                <CheckBox selected="{/NeedAprrove}" text="If needed, you can design Email Notify also"
+                                <CheckBox selected="{/NeedApprove}" text="If needed, you can design Email Notify also"
                                     enabled="{g>/bOwner}"/>
 
-                                <!-- <Label text="Allow cancel myself" tooltip="" visible="{/NeedAprrove}" />
-                                <CheckBox selected="{/AllowCancel}" visible="{/NeedAprrove}" 
+                                <!-- <Label text="Allow cancel myself" tooltip="" visible="{/NeedApprove}" />
+                                <CheckBox selected="{/AllowCancel}" visible="{/NeedApprove}" 
                                     enabled="{g>/bOwner}"/> -->
 
                             <core:Title text="Security" />

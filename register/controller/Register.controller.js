@@ -129,15 +129,18 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		this.byId("registerPage").addContent( form);
 	},
 	
-	
-	fmtPageTitle: function( status , reason) {
+
+	updatePageTitle: function( status , reason) {
+		var title;
 		if (status == "Rejected") {
-	    	return "My Registration : status [ " + status + " ], reason: " + reason;
+			var title = "My Registration of [ {0} ]: status {1}, reason {2}";
+			title = title.sapFormat(this.projectCfg.Title, this.mRegister.Status, this.mRegister.RejectReason);
 		} else {
-			if (status == undefined)
-				status = "";
-			return "My Registration : status [ " + status + " ]";
+			var title = "My Registration of [ {0} ]: status {1}";
+			title = title.sapFormat(this.projectCfg.Title, this.mRegister.Status);
 		}
+		
+		this.byId('registerPage').setTitle( title );
 	},
 	
 	
@@ -155,7 +158,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 			//now when user create new entry it will come here
 		}
 		this.oModel.setData( this.mRegister );
-
+		this.updatePageTitle();
 		this.createOrUpdateFooterButton();
 		this.checkButtonStatus();
 	},
@@ -312,7 +315,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		var aActionInfo = Enum.RegisterActionButton[ this.mRegister.Status];
 		for (var i=0; i < aActionInfo.length; i++) {
 			var  info = aActionInfo[i];
-			if ( info.name == 'Cancel' && !this.projectCfg.allowCancel) {
+			if ( info.name == 'Cancel' && !this.projectCfg.AllowCancel) {
 				continue;
 			}
 
@@ -354,6 +357,13 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
 	    	this.oSubmitBtn.setEnabled(status);
 	    }
+	    
+	    //for save and sub-project, at least select the sub-project item
+	    if ( this.oSaveBtn) {
+	    	if (this.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.SubProject) {
+	    		this.oSaveBtn.setEnabled( !! this.mRegister.SubProject);
+	    	}
+	    }
 	},
 	
 	//for all the input field
@@ -369,6 +379,52 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    var binding = uploader.getBinding("fileName");
 	    var model = binding.getModel();
 	    model.setProperty(binding.getPath(), uploader.getFileName());
+	},
+	
+	checkStatusOfLimitationCheck: function( ) {
+		//only when the expected stats is Submitted then need check whether exceed the limitation
+		if ( this.mRegister.Status != Enum.Status.Submitted)
+			return;
+
+	    if ( this.projectCfg.NeedApprove || 
+	    	this.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.No) { 
+	    	return ;
+	    }
+
+	    //for the Sub-Project, need check whether that sub-project has limit 
+		if (this.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.SubProject) {
+			var aLimit = this.projectCfg.SubProjectLimit.split(";");
+			var aInfo = this.projectCfg.SubProjectInfo.split(";");
+			var idx = aInfo.indexOf(this.mRegister.SubProject);
+			if (idx!= -1) {
+				var limit = aLimit[idx];
+				if ( limit == '' || limit == '0')
+					return;
+			} else {
+				return;
+			}
+		}
+
+		function onQueryStatusSuccess( oData ) {
+		    if ( oData.Status == Enum.Status.Submitted) {
+		    	Util.info("Congratulations, you have sumbitted successfully!");
+		    } else {
+		    	Util.info("Sorry, you have added to the waiting list becase registration exceed maximun limitation!");
+		    }
+		}
+		
+		function onQueryStatusError( error ) {
+		    Util.showError("Error to get the submitted status", error);
+		}
+		
+		
+		//just to query to check whether now the status is Submitted or Waiting 
+	    var path = "/Registrations(ProjectId=" + this.projectId + "L,RegisterId=" 
+	    		+ this.mRegister.RegisterId + "L,UserId='" + this.mRegister.UserId + "')";
+		this.oDataModel.read(path, {
+			success:  onQueryStatusSuccess,
+			error: onQueryStatusError 
+		});	    
 	},
 	
 	
@@ -392,8 +448,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    if (oldStatus != "New") {
 	    	bCreate = false;
 	    }
-
-	    //??this.mRegister.Status = newStatus;
+	    this.mRegister.Status = newStatus;
 	    
 	    //for submit, need upload the attachment 
 	    var oldAction = action;
@@ -417,7 +472,12 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
 	        //for sub-project, need control the enabled for sub-project selection
 	        that.oModel.setProperty("/Status", newStatus);
+
+	        //then update the attachment
 	        that.uploadAttachments(btn, oldAction);
+
+	        //for the project has limitation without approve process, need check whether it exceed the limiation or not 
+	        that.checkStatusOfLimitationCheck();
 	    }
 	    
 	    function onRegActionError(error) {
@@ -573,8 +633,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		Util.showToast(oldAction + " successful!");
 		
 		//update the page title 
-		this.byId('registerPage').setTitle( this.fmtPageTitle(this.mRegister.Status));
-
+		this.updatePageTitle();
 	    this.createOrUpdateFooterButton();
 		this.checkButtonStatus();
 
