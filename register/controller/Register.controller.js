@@ -59,6 +59,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 			that.setBusy(false);
 			if (oData.results.length >0) {
 				that.projectCfg = oData.results[0];
+	    		that.addProjectCfgExtraProperty();
 
 				that.createRegisterScreen();
 
@@ -100,18 +101,13 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 			Util.showError("The project configure format error." + Enum.GeneralSolution);
 			return;
 		}
-		//if it has the sub-project limitation, then the first line is the sub-project selection, get from  
-		var limitEnum = Util.mapRegistrationLimitToEnum(this.projectCfg.RegistrationLimit);
-		this.projectCfg.RegistrationLimit_Ext = limitEnum;
-		if ( limitEnum == Enum.RegistrationLimit.SubProject) {
-			//label: '', tooltip: '', property: '' mandatory: true, type: [input, date, list,attachment], candidate: ['male', 'famel'] 		
-			var subPrj = {
-				label: "Sub Project",  bSubProject: true, 
-				property: "SubProject",  mandatory: true,  type: Enum.ControlType.List
-			};
-			subPrj.candidate = this.projectCfg.SubProjectInfo;
-			aFormCfg.unshift(subPrj);
+
+		//add sub-project configure
+		var subPrjCfg = this.getSubProjectFormCfg(this.projectCfg);
+		if (subPrjCfg) {
+			aFormCfg.unshift(subPrjCfg);
 		}
+
 		this.aFormCfg = aFormCfg;
 
 		this.byId("switchEntryBtn").setVisible(this.projectCfg.MultipleEntry);
@@ -120,7 +116,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		if (this.projectCfg.DisplayProjectInfoAtTop) {
 			var header = this.createProjectHeader(this.projectCfg);
 			if ( header)
-				this.byId("registerPage").addContent( );
+				this.byId("registerPage").addContent( header );
 		} else {
 			//!!just create a link at the top
 		}
@@ -407,9 +403,9 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
 		function onQueryStatusSuccess( oData ) {
 		    if ( oData.Status == Enum.Status.Submitted) {
-		    	Util.info("Congratulations, you have sumbitted successfully!");
+		    	Util.info("Congratulations, you have submitted successfully!");
 		    } else {
-		    	Util.info("Sorry, you have added to the waiting list becase registration exceed maximun limitation!");
+		    	Util.info("Sorry, you have added to the waiting list because registration exceed maximun limitation!");
 		    }
 		}
 		
@@ -508,7 +504,14 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    }
 	    //for the new entry, need set the projectId 
 	    mData.ProjectId = this.projectId;
-
+	    if ( newStatus == Enum.Status.Submitted) {
+	    	mData.ActionFlag = Enum.ActionFlag.Submit;	
+	    } else if (newStatus == Enum.Status.Canceled){
+	    	mData.ActionFlag = Enum.ActionFlag.Cancel;	
+	    } else {
+	    	mData.ActionFlag = Enum.ActionFlag.Others;	
+	    }
+	    
 	    //?? for the Age, need use the number, sometimes it still need use the string 
 	    // if (mData.Age) {
 	    // 	mData.Age = parseInt(mData.Age);

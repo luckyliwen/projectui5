@@ -42,7 +42,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 			that.setBusy(false);
 			if (oData.results.length >0) {
 				that.projectCfg = oData.results[0];
-
+	    		that.addProjectCfgExtraProperty();
 				try {
 					that.aFormCfg = JSON.parse( that.projectCfg.Form );
 				} catch (e) {
@@ -133,8 +133,12 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		this.aFormCfg.unshift({property: 'SapUserName', label: 'SAP user name', tooltip: "SAP User name get from system", notVisible: true});
 		this.aFormCfg.unshift({property: 'UserId', label: 'SAP user ID', tooltip: "SAP User ID get from system"});
 		this.aFormCfg.unshift({property: 'SubmittedTime', label: 'Submitted Time', tooltip: "Submitted Time"});
-		
 
+		var subPrjCfg = this.getSubProjectFormCfg(this.projectCfg);
+		if (subPrjCfg) {
+			this.aFormCfg.unshift(subPrjCfg);
+		}
+		
 		// if support multiple entry, then add that so can easy know who create multiple entry
 		if ( this.projectCfg.MultipleEntry) {
 			this.aFormCfg.unshift({property: 'EntriesCount', label: 'Entries Count', 
@@ -374,6 +378,12 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    }
 
 	    //need get all selected items
+	    if ( mData.Status == Enum.Status.Approved) {
+	    	mData.ActionFlag = Enum.ActionFlag.Submit;	
+	    } else {
+	    	mData.ActionFlag = Enum.ActionFlag.Others;	
+	    }
+
 		var selIdx = this.oRegTable.getSelectedIndices();
 	    totalItems = selIdx.length;
 	    for (var i=0; i < selIdx.length; i++) {

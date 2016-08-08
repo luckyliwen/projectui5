@@ -448,14 +448,10 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 
 		//depend on the sub-Project limit, need add the sub-project or not 
 		var aTmpForm = this.aFormCfg.concat();
-		if ( this.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject) {
-			//label: '', tooltip: '', property: '' mandatory: true, type: [input, date, list,attachment], candidate: ['male', 'famel'] 		
-			var subPrj = {
-				label: "Sub Project",  bSubProject: true, 
-				property: "SubProject",  mandatory: true,  type: Enum.ControlType.List
-			};
-			subPrj.candidate = this.projectCfg.SubProjectInfo;
-			aTmpForm.unshift(subPrj);
+
+		var subPrjCfg = this.getSubProjectFormCfg(this.projectCfg);
+		if (subPrjCfg) {
+			aTmpForm.unshift(subPrjCfg);
 		}
 
 		var form  = this.createRegisterForm(aTmpForm);
@@ -594,7 +590,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	if ( !("NeedEmailNotification" in this.projectCfg)) {
 	    		this.projectCfg.NeedEmailNotification = false;
 	    	}
-	    	this.projectCfg.RegistrationLimit_Ext = Util.mapRegistrationLimitToEnum(this.projectCfg.RegistrationLimit);
+	    	this.addProjectCfgExtraProperty();
    		    this.aSubProject = null;
 
 
