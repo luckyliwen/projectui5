@@ -58,7 +58,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	},
 
 	fmtCandidate: function(type) {
-	    if (type == 'List' || type == 'Radio')
+	    if (type == 'List' || type == 'Radio' || type == "Agreement")
 	    	return true;
 	    else
 	    	return false;
@@ -159,7 +159,13 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	RegistrationSecurity: 'Public', 
 	    	bOwner: true,
 	    	NeedEmailNotification: false,
-	    	RegistrationLimit_Ext: "No"
+	    	RegistrationLimit_Ext: "No",
+	    	SubProjectInfo: "",
+	    	SubProjectTitle: "Sub-Project",
+	    	StartDate: "", StartTime: "",
+	    	EndDate: "", EndTime: "",
+	    	Location: "",
+	    	Status: "Opened"
 	    };
 	},
 
@@ -309,6 +315,27 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 			Util.info('Please set the title first.');
 			return;
 		}
+		//also for the subProject define, need check it has been define successful
+		if ( this.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject) {
+			var subPrjOk = false;
+			if ( this.aSubProject != null) {
+				subPrjOk = true;
+				for (var i=0; i < this.aSubProject.length; i++) {
+					if ( ! this.aSubProject[i].info) {
+						subPrjOk = false;
+						break;
+					}
+				}
+			} else {
+				if (this.projectCfg.SubProjectInfo) {
+					subPrjOk = true;
+				}
+			}
+			if (!subPrjOk) {
+				Util.info("You select limitation as sub-project, but not define detail information for sub-projects!");
+				return;
+			}
+		}
 
    	    function onSaveSuccess(oData) {
 	    	
@@ -337,6 +364,8 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		};
 
 		var mData = jQuery.extend({}, true, this.projectCfg);
+		mData.SubProjectInfo = JSON.stringify( this.aSubProject);
+
 		delete mData.ProjectId;
 		delete mData.Author;
 		delete mData.ModifiedTime;
@@ -593,7 +622,6 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	this.addProjectCfgExtraProperty();
    		    this.aSubProject = null;
 
-
 	    	var bOwner = false;
 	    	if (this.userId == this.projectCfg.Author) {
 				bOwner = true;
@@ -623,26 +651,29 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
         if (!this.oSubProjectDlg) {
             this.oSubProjectDlg = sap.ui.xmlfragment(this.getView().getId(), "csr.mng.view.SubProjectDialog", this);
         	this.oSubProjectDlg.setModel(this.oSubProjectModel);
+        	this.byId("subProjectTitleInut").setModel(this.oProjectModel);
         }
 
         //mapping from string to array, only need when project changed or not do init
         if ( this.aSubProject === null) {
         	this.aSubProject = [];
 			if (this.projectCfg.SubProjectInfo) {
-				var aInfo = this.projectCfg.SubProjectInfo.split(";");
+				/*var aInfo = this.projectCfg.SubProjectInfo.split(";");
 				var aLimit = this.projectCfg.SubProjectLimit.split(";");
 				for (var i=0; i < aInfo.length; i++) {
 					this.aSubProject.push({
 						info: aInfo[i],
 						limit: aLimit[i]
 					});
-				}
+				}*/
+				//it is a json format 
+				this.aSubProject = JSON.parse( this.projectCfg.SubProjectInfo);
 	        } else {
 	        	//just 3 default raw 
 	        	this.aSubProject= [
-	        		{info: "", limit: ""},
-	        		{info: "", limit: ""},
-	        		{info: "", limit: ""}
+	        		{info: "", limit: "", startDate: "", startTime:"", endDate: "", endTime: "", location: "", description:"", status: "Opened"},
+	        		{info: "", limit: "", startDate: "", startTime:"", endDate: "", endTime: "", location: "", description:"", status: "Opened"},
+	        		{info: "", limit: "", startDate: "", startTime:"", endDate: "", endTime: "", location: "", description:"", status: "Opened"},
 	        	];
 	        }
 	        this.oSubProjectModel.setData( this.aSubProject);
@@ -652,14 +683,14 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	
 	onSubProjectOkButtonPressed: function( evt ) {
     	//save them back
-    	var prjInfo = "", prjLimit = "";
-    	for (var i=0; i < this.aSubProject.length; i++) {
-    		prjInfo += this.aSubProject[i].info.trim() + ";";
-    		prjLimit += this.aSubProject[i].limit.trim() + ";";
-    	}
-		//remove the last extra ;
-		this.projectCfg.SubProjectInfo = prjInfo.substr(0, prjInfo.length -1);
-		this.projectCfg.SubProjectLimit = prjLimit.substr(0, prjLimit.length -1);
+  //   	var prjInfo = "", prjLimit = "";
+  //   	for (var i=0; i < this.aSubProject.length; i++) {
+  //   		prjInfo += this.aSubProject[i].info.trim() + ";";
+  //   		prjLimit += this.aSubProject[i].limit.trim() + ";";
+  //   	}
+		// //remove the last extra ;
+		// this.projectCfg.SubProjectInfo = prjInfo.substr(0, prjInfo.length -1);
+		// this.projectCfg.SubProjectLimit = prjLimit.substr(0, prjLimit.length -1);
         
         this.oSubProjectDlg.close();
 	},
@@ -668,7 +699,14 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    var btn = evt.getSource();
 	    var path = btn.getBindingContext().getPath();  // like '/2'
 	    var idx = parseInt( path.substr(1));
-	    this.aSubProject.splice(idx,1);
+	    //if the last row, then need just clear it, otherwise can't add any more 
+	    if (this.aSubProject.length > 1) {
+	    	this.aSubProject.splice(idx,1);
+	    } else {
+	    	for (var key in this.aSubProject[0]) {
+	    		this.aSubProject[0][key] = "";
+	    	}
+	    }
         this.oSubProjectModel.setData( this.aSubProject);
 	},
 
@@ -691,6 +729,19 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	this.oProjectModel.setProperty("/" + key, template[key]);
 	    }
 	},
+
+	//normally start and end date same day
+	onStartDateChanged: function( evt ) {
+	    var value = evt.getSource().getValue();
+	    if (value) {
+	    	var endDate = this.byId("endDate");
+	    	var endDateValue = endDate.getValue();
+	    	if ( !endDateValue) {
+	    		endDate.setValue(value);
+	    	}
+	    }
+	},
+	
 });
 
 	return ControllerController;

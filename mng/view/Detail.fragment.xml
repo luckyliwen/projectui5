@@ -30,11 +30,24 @@
                                 <Label text="Title"  required="true" tooltip="Brief introduct of the project"/>
                                 <Input value="{/Title}"  enabled="{g>/bOwner}" />
                                 
-                                <Label text="Description" tooltip="Long description of the project, normally include time, venue..."/>
+                                <Label text="Start date and time"  required="true" tooltip="Start date and time"/>
+                                <DatePicker value="{/StartDate}" id="startDate" enabled="{g>/bOwner}" change="onStartDateChanged"/>
+                                <TimePicker value="{/StartTime}"  enabled="{g>/bOwner}"/>
+
+                                <Label text="End date and time"  tooltip="End date and time, if not defined, then default is 1 day"/>
+                                <DatePicker value="{/EndDate}"  id="endDate" enabled="{g>/bOwner}"/>
+                                <TimePicker value="{/EndTime}"  enabled="{g>/bOwner}"/>
+
+                                <Label text="Location" required="true"  />
+                                <Input value="{/Location}"  placeholder="location" enabled="{g>/bOwner}"/>
+                                
+                                <Label text="Description" tooltip="Detail description of the project"/>
                                 <TextArea rows="2" value="{/Description}" enabled="{g>/bOwner}"/> 
 
                                 <Label text="Link"  tooltip="URL which provide extra information"/>
                                 <Input value="{/Link}"  placeholder="wiki or jam page url" enabled="{g>/bOwner}"/>
+
+
 
                                 <Label text="Form download URL"  tooltip="The URL of form downloading, only need if employee need upload some form "/>
                                 <Input value="{/FormDownloadUrl}"  placeholder="url of attachment user need sign and upload" enabled="{g>/bOwner}"/>
@@ -58,8 +71,8 @@
 
                             <Select selectedKey="{/RegistrationLimit_Ext}"  enabled="{g>/bOwner}">
                                 <core:Item  key="No"  text="No limit" />
-                                <core:Item  key="SubProject" text="Sub-projects with limit" />
                                 <core:Item  key="OneProject"  text="One project with limit" />
+                                <core:Item  key="SubProject" text="Sub-projects with limit" />
                             </Select>
                             <Input value="{/RegistrationLimit}"  placeholder="limitation number"
                                 visible="{= ${/RegistrationLimit_Ext} === 'OneProject'}" enabled="{g>/bOwner}"/>
@@ -92,6 +105,13 @@
                                     <core:Item  key="Public"  text="Public -- All employee can see" />
                                     <core:Item  key="Protected"  text="Protected -- Only register can see" />
                                     <core:Item  key="Private"  text="Private  -- Only administrator can see" />
+                                </Select>
+
+                            <core:Title text="Project Overall Control" />
+                                <Label text="Status"  required="true" tooltip="Used to open or close registration" />
+                                <Select selectedKey="{/Status}" >
+                                    <core:Item  key="Opened"  text="Opened -- Employee can register" />
+                                    <core:Item  key="Closed"  text="Closed -- Employee can't register" />
                                 </Select>
 
                             </form:content>
@@ -190,6 +210,7 @@
                         <core:Item  key="Number"  text="Number" />
                         <core:Item  key="Check"  text="CheckBox" />
                         <core:Item  key="Radio"  text="Radio Button" />
+                        <core:Item  key="Agreement"  text="License Agreement" />
                     </Select>
                 </table:template>
             </table:Column>
@@ -218,7 +239,9 @@
                         tooltip="Only need when type is List. Seperate it by ;"/> 
                 </table:label>
                 <table:template>
-                    <Input value="{candidate}" visible="{path: 'type', formatter: '.fmtCandidate'}" enabled="{g>/bOwner}"/>
+                    <TextArea width="100%" rows="1" value="{candidate}" visible="{path: 'type', formatter: '.fmtCandidate'}" 
+                        placeholder="{=  ${type} === 'Agreement' ? 'Agreement Statement' : 'list item, separate by ; ' }"
+                        enabled="{g>/bOwner}"/>
                 </table:template>
             </table:Column>
             

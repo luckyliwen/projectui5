@@ -2,53 +2,80 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
 
-    <Dialog class="sapUiSizeCompact"
+    <Dialog class="sapUiSizeCompact"  contentWidth="1280px"  
         title="Define sub-project information and limitation">
         <content>
-            <Table
+            <VBox>
+            <Label text="Tips" design="Bold"/>
+            <Label text="1: Only information and limit is mandatory, others are optional" />
+            <Label text="2: Start, end date/time and location" /> 
+            <Label class="MarginLeftRight" text="   if not define, it will choose the value define in project. " />
+            <Label class="MarginLeftRight" 
+                text="   If define both, then it means the combination of both. For example you can define location in Project as 'ShangHai Labs',  and in this dialog define location as 'PVG01/C2.1' forthe meeting room" />
+            <Label text="3: You can open/close sub-project. If it is set Closed, then end user can't register for that sub-project any more" />
+            <Label />
+            <HBox>
+                <Label text="Sub-Project Label" />
+                <Input class="MarginLeftRight" width="200px" id="subProjectTitleInut" value="{/SubProjectTitle}" />
+            </HBox>
+            <Table 
                 id="idProductsTable" items="{/}"
                 inset="false">
+                <headerToolbar>
+                    <Toolbar> <content> <Title text="Sub-Project define" level="H2" /> </content> </Toolbar>
+                </headerToolbar>
+
                 <columns>
-                    <Column
-                        width="20em">
-                        <header>
-                            <Text
-                                text="Information">
-                            </Text>
-                        </header>
+                    <Column >
+                        <header> <Text text="*Information" /> </header>
                     </Column>
-                    <Column
-                        width="10em">
-                        <header>
-                            <Text
-                                text="Limitation"
+                    <Column > <header> <Text text="*Limitation"
                                 tooltip="Empty or 0 means no limitation">
-                                <tooltip>
-                                </tooltip>
-                            </Text>
-                        </header>
+                            </Text> </header>
                     </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true">
-                        <header>
-                            <Text
-                                text="Operations">
-                            </Text>
-                        </header>
+                    <Column >
+                        <header> <Text text="Start Date" /> </header>
                     </Column>
+                    <Column >
+                        <header> <Text text="Start Time" /> </header>
+                    </Column>
+                    <Column >
+                        <header> <Text text="End Date" /> </header>
+                    </Column>
+                    <Column> 
+                        <header> <Text text="End Time" /> </header>
+                    </Column>
+                    <Column >
+                        <header> <Text text="Location" /> </header>
+                    </Column>                    
+                    <Column >
+                        <header> <Text text="Description" /> </header>
+                    </Column>                    
+                    <Column width="110px">
+                        <header> <Text text="Status" /> </header>
+                    </Column>                    
+                    <Column width="50px">
+                        <header> <Text text="Operation" /> </header>
+                    </Column>                                        
                 </columns>
                 <items>
                     <ColumnListItem>
                         <cells>
-                            <Input
-                                value="{info}">
-                            </Input>
-                            <Input
-                                value="{limit}">
-                            </Input>
-                            <HBox>
-                                <items>
+                            <Input value="{info}" />
+                            <Input value="{limit}" width="50px"/>
+                            <DatePicker value="{startDate}" />
+                            <TimePicker value="{startTime}"  />
+                            <DatePicker value="{endDate}" />
+                            <TimePicker value="{endTime}"  />
+                            <Input value="{location}" />
+                            <TextArea value="{description}" rows="1"/>
+
+                        <Select selectedKey="{status}" >
+                            <core:Item  key="Opened"  text="Opened" />
+                            <core:Item  key="Closed"  text="Closed" />
+                        </Select>
+
+                            <HBox > <items>
                                     <Button
                                         icon="sap-icon://delete"
                                         press="onSubProjectRowDeletePressed">
@@ -63,6 +90,7 @@
                     </ColumnListItem>
                 </items>
             </Table>
+        </VBox>
         </content>
         <beginButton>
             <Button

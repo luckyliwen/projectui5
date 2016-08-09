@@ -31,7 +31,9 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		//project configure 
 		this.aFormCfg = null;
 		this.projectCfg = null;
-
+		this.projectOpened = true; //overall project status, need considerate both Project/SubProject
+		this.aSubProject = null;
+		this.subProjectIndex = -1; //select which subproject
 		this.getProjectConfigure();
 		
 		//all the file uploader, as we need do the attachment upload one by one
@@ -55,11 +57,34 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	getProjectConfigure: function(  ) {
 	    var that = this;
 
-		function onGetProjectCfgErrorSuccess(oData) {
+		function onGetProjectCfgSuccess(oData) {
 			that.setBusy(false);
 			if (oData.results.length >0) {
 				that.projectCfg = oData.results[0];
+
+				//here  just set projectOpened by overall status 
 	    		that.addProjectCfgExtraProperty();
+
+				that.projectOpened = (that.projectCfg.Status == Enum.ProjectStatus.Opened);
+				if (that.projectOpened) {
+					//first check whether all the sub-project has closed, if so, inform user now
+					var allSubPrjClose  = true;
+					if ( that.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject) {
+						for (var i=0; i < that.aSubProject.length; i++) {
+							if ( that.aSubProject[i].status == Enum.ProjectStatus.Opened) {
+								allSubPrjClose = false;
+								break;
+							}
+						}
+						if ( allSubPrjClose) {
+							that.projectOpened = false;
+						}
+					}
+				} 
+				if ( !that.projectOpened) {
+					that.byId("newEntryBtn").setEnabled(false);
+					Util.info("Project has been closed, can't register any more!");
+				}
 
 				that.createRegisterScreen();
 
@@ -80,7 +105,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		
 	    this.oDataModel.read("/Projects", {
 	    	filters: [new sap.ui.model.Filter("ProjectId", 'EQ', this.projectId)],
-			success: onGetProjectCfgErrorSuccess,
+			success: onGetProjectCfgSuccess,
 			error: onGetProjectCfgError
 		});
 
@@ -109,6 +134,13 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		}
 
 		this.aFormCfg = aFormCfg;
+		//check whether has the Agreement item, as it will not save to backend, just need user confirm
+		for (var i=0; i < aFormCfg.length; i++) {
+			if (aFormCfg[i].property == 'Agreement') {
+				this.projectCfg.NeedAgreement_Ext = true;
+				break;
+			}
+		}
 
 		this.byId("switchEntryBtn").setVisible(this.projectCfg.MultipleEntry);
 		this.byId("newEntryBtn").setVisible(this.projectCfg.MultipleEntry);
@@ -129,10 +161,10 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	updatePageTitle: function( status , reason) {
 		var title;
 		if (status == "Rejected") {
-			var title = "My Registration of [ {0} ]: status {1}, reason {2}";
+			title = "My Registration of [ {0} ]: status {1}, reason {2}";
 			title = title.sapFormat(this.projectCfg.Title, this.mRegister.Status, this.mRegister.RejectReason);
 		} else {
-			var title = "My Registration of [ {0} ]: status {1}";
+			title = "My Registration of [ {0} ]: status {1}";
 			title = title.sapFormat(this.projectCfg.Title, this.mRegister.Status);
 		}
 		
@@ -150,6 +182,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    //just one, copy the data
 	    if (this.currentResigerIndex != -1) {
 			this.mRegister = this.aRegister[ this.currentResigerIndex ];
+			this.mRegister.Agreement = true; //Only used for the new 
 		} else {
 			//now when user create new entry it will come here
 		}
@@ -337,27 +370,32 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	checkButtonStatus: function( evt ) {
 	    //for the save, cancel always enabled 
 	    if (this.oSubmitBtn) {
-	    	var status = true;
+	    	if ( this.projectOpened) {
+		    	var status = true;
 
-	    	//check all the necessary input is not null
-			for (var i=0; i < this.aFormCfg.length; i++) {
-				var cfg = this.aFormCfg[i];
-				if (cfg.mandatory) {
-					var realValue = this.mRegister[ cfg.property];
-    				if (!realValue) {
-    					status = false;
-    					break;
-	    			}
+		    	//check all the necessary input is not null
+				for (var i=0; i < this.aFormCfg.length; i++) {
+					var cfg = this.aFormCfg[i];
+					if (cfg.mandatory) {
+						var realValue = this.mRegister[ cfg.property];
+	    				if (!realValue) {
+	    					status = false;
+	    					break;
+		    			}
+					}
 				}
-			}
-
-	    	this.oSubmitBtn.setEnabled(status);
+		    	this.oSubmitBtn.setEnabled(status);
+		    } else {
+		    	this.oSubmitBtn.setEnabled(false);
+		    }
 	    }
 	    
 	    //for save and sub-project, at least select the sub-project item
 	    if ( this.oSaveBtn) {
 	    	if (this.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.SubProject) {
-	    		this.oSaveBtn.setEnabled( !! this.mRegister.SubProject);
+	    		this.oSaveBtn.setEnabled( !! this.mRegister.SubProject && this.projectOpened);
+	    	} else {
+	    		this.oSaveBtn.setEnabled( this.projectOpened);
 	    	}
 	    }
 	},
@@ -389,17 +427,15 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
 	    //for the Sub-Project, need check whether that sub-project has limit 
 		if (this.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.SubProject) {
-			var aLimit = this.projectCfg.SubProjectLimit.split(";");
-			var aInfo = this.projectCfg.SubProjectInfo.split(";");
-			var idx = aInfo.indexOf(this.mRegister.SubProject);
-			if (idx!= -1) {
-				var limit = aLimit[idx];
-				if ( limit == '' || limit == '0')
-					return;
-			} else {
-				return;
+			for (var i=0; i < this.aSubProject.length; i++) {
+				if (this.mRegister.SubProject == this.aSubProject[i].info) {
+					var limit = this.aSubProject[i].limit;
+					if ( limit == '' || limit == '0')
+						return;	
+					}
 			}
 		}
+		//for the OneProject, always need check
 
 		function onQueryStatusSuccess( oData ) {
 		    if ( oData.Status == Enum.Status.Submitted) {
@@ -427,14 +463,21 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	//as Save, Cancel, Submit has similar logic, so use same function
 	onResigerActionButtonPressed: function( oEvent ) {
 		//for the age, need check ??
-
 		var btn = oEvent.getSource();
 		var action = btn.data("Action");
 
+		//for the Save/Submit, if have the agreement, then must agree it 
 		if (action == "Cancel") {
 			var bConfirm = confirm("Are you sure to cancel the Registraion? After cancel, then can't submit again!");
 			if (!bConfirm)
 				return;
+		} else {
+			if ( this.projectCfg.NeedAgreement_Ext) {
+				if ( ! this.mRegister.Agreement) {
+					Util.info("You must accept the agreement in order to save to submit!");
+					return;
+				}
+			}
 		}
 
 		var oldStatus = this.mRegister.Status;
@@ -491,7 +534,8 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    //as there are some extra data, so here need just get the required data 
 	    var mData = jQuery.extend({}, true, this.mRegister);
 		delete mData.EntriesCount;
-    	delete  mData.RegisterId;
+    	delete mData.RegisterId;
+    	delete mData.Agreement;
 		
 	    //for the null value, need delete 
 	    for (var key in mData) {
@@ -685,6 +729,26 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    }
 	},
 
+	onSubProjectChanged: function( evt, oTextAreaInfo) {
+		BaseController.prototype.onSubProjectChanged.call(this, evt, oTextAreaInfo);
+		
+		//also depend on current select subProject, decided whether it register or not 
+		if ( this.projectCfg.Status == Enum.ProjectStatus.Opened) {
+			var subPrjStatus = this.aSubProject[this.subProjectIndex].status;
+			if ( subPrjStatus == Enum.ProjectStatus.Closed) {
+				var info = "The sub-project [{0}] has been closed, please select other open sub-project to register";
+				Util.info( info.sapFormat( this.aSubProject[this.subProjectIndex].info)); 
+				this.projectOpened = false;
+			} else {
+				this.projectOpened = true;
+			}
+		} else {
+			this.projectOpened = false;	
+		}
+		
+		//update the status
+		this.checkButtonStatus();
+	}
 });
 	
 	

@@ -147,6 +147,10 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 
 		for (var i=0; i < this.aFormCfg.length; i++) {
 			var  cfg = this.aFormCfg[i];
+			if ( cfg.property == "Agreement"){
+				continue;
+			}
+			
 			var label = new sap.m.Label({text:cfg.label});
 			if (cfg.tooltip) {
 				label.setTooltip( cfg.tooltip);
