@@ -63,9 +63,9 @@
                                 <CheckBox selected="{/DisplayProjectInfoAtTop}" text="If checked, employee can see project at the top" 
                                     enabled="{g>/bOwner}"/> -->
 
-                                <Label text="Deadline" tooltip="The deadline which employee must finish"/>
+                                <!-- <Label text="Deadline" tooltip="The deadline which employee must finish"/>
                                 <Input value="{/Deadline}"  enabled="{g>/bOwner}"/> 
-
+ -->
                                 <Label text="Maximum Registration Limit" tooltip="The maximum number of registration"/>
                                 <!-- <Input value="{/MaxNum}"  enabled="{g>/bOwner}"/>  -->
                                 
@@ -338,7 +338,7 @@
                         visible="{g>/bOwner}"
                         />
                     <Button
-                        text="Duplicate"
+                        text="New Event from Current"
                         tooltip="Create new project by copy existing content"
                         icon="sap-icon://duplicate"
                         id="duplicateBtn"
