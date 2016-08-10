@@ -2,7 +2,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
 
-    <Dialog class="sapUiSizeCompact"  contentWidth="1280px"  
+    <Dialog class="sapUiSizeCompact"  contentWidth="1280px"  contentHeight="600px"
         title="Define sub-project information and limitation">
         <content>
             <VBox>
@@ -11,7 +11,7 @@
             <Label text="2: Start, end date/time and location" /> 
             <Label class="MarginLeftRight" text="   if not define, it will choose the value define in project. " />
             <Label class="MarginLeftRight" 
-                text="   If define both, then it means the combination of both. For example you can define location in Project as 'ShangHai Labs',  and in this dialog define location as 'PVG01/C2.1' forthe meeting room" />
+                text="%20%20   If define both, then it means the combination of both. For example you can define location in Project as 'ShangHai Labs',  and in this dialog define location as 'PVG01/C2.1' forthe meeting room" />
             <Label text="3: You can open/close sub-project. If it is set Closed, then end user can't register for that sub-project any more" />
             <Label />
             <HBox>

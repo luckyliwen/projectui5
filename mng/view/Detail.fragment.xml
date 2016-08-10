@@ -41,8 +41,9 @@
                                 <Label text="Location" required="true"  />
                                 <Input value="{/Location}"  placeholder="location" enabled="{g>/bOwner}"/>
                                 
-                                <Label text="Description" tooltip="Detail description of the project"/>
-                                <TextArea rows="2" value="{/Description}" enabled="{g>/bOwner}"/> 
+                                <Label text="Description" tooltip="Detail description of the project" />
+                                <TextArea rows="2" value="{/Description}" enabled="{g>/bOwner}"
+                                    placeholder=" Special format such as http://xx, https:// mailto:mail@com will display as hyper link "/> 
 
                                 <Label text="Link"  tooltip="URL which provide extra information"/>
                                 <Input value="{/Link}"  placeholder="wiki or jam page url" enabled="{g>/bOwner}"/>
@@ -224,7 +225,7 @@
                 </table:template>
             </table:Column>
 
-             <table:Column width="22%">
+            <table:Column width="22%">
                 <table:label>
                     <Label text="Tooltip" tooltip="Inut some explan information to help user how to fill" /> 
                 </table:label>
@@ -233,15 +234,24 @@
                 </table:template>
             </table:Column>
 
-            <table:Column width="40%">
+            <table:Column width="30%">
                 <table:label>
                     <Label text="Candidate seperate by ';'  valid for List/Radio type" 
                         tooltip="Only need when type is List. Seperate it by ;"/> 
                 </table:label>
                 <table:template>
-                    <TextArea width="100%" rows="1" value="{candidate}" visible="{path: 'type', formatter: '.fmtCandidate'}" 
-                        placeholder="{=  ${type} === 'Agreement' ? 'Agreement Statement' : 'list item, separate by ; ' }"
+                    <TextArea width="100%" rows="1" value="{candidate}"  visible="{path: 'type', formatter: '.fmtCandidate'}"
+                        placeholder="{=  ${type} === 'Agreement' ? 'Agreement Statement' : 'Define list item directly, separate by ; ' }"
                         enabled="{g>/bOwner}"/>
+                </table:template>
+            </table:Column>
+
+            <table:Column width="10%">
+                <table:label>
+                    <Label text="Customize" tooltip="Press the button to define content" /> 
+                </table:label>
+                <table:template>
+                    <Button text="Define" visible="{path: 'type', formatter: '.fmtCandidate'}"/>  
                 </table:template>
             </table:Column>
             
