@@ -22,101 +22,108 @@
                           labelSpanL="4"
                           labelSpanM="4"
                          >
-                        <form:content>
-                            <core:Title text="General" />
-                               <!--  <Label text="Author"  required="true" />
-                                <Input value="{/Author}"  enabled="false" /> -->
+        <form:content>
+            <core:Title text="General" />
+               <!--  <Label text="Owner"  required="true" />
+                <Input value="{/Owner}"  enabled="false" /> -->
 
-                                <Label text="Title"  required="true" tooltip="Brief introduct of the project"/>
-                                <Input value="{/Title}"  enabled="{g>/bOwner}" />
-                                
-                                <Label text="Start date and time"  required="true" tooltip="Start date and time"/>
-                                <DatePicker value="{/StartDate}" id="startDate" enabled="{g>/bOwner}" change="onStartDateChanged"/>
-                                <TimePicker value="{/StartTime}"  enabled="{g>/bOwner}"/>
+                <Label text="Title"  required="true" tooltip="Brief introduct of the project"/>
+                <Input value="{/Title}"  id="Title" enabled="{g>/bOwner}" />
+                
+                <Label text="Event Duration" required="true"
+                    />
+                <DateTimePicker value="{/EventStartDateTime}"  placeholder="From" 
+                    id="EventStartDateTime" enabled="{g>/bOwner}"/>
+                <DateTimePicker value="{/EventEndDateTime}"  placeholder="To" 
+                    id="EventEndDateTime" enabled="{g>/bOwner}" changed="onDurationEndChanged"/>
 
-                                <Label text="End date and time"  tooltip="End date and time, if not defined, then default is 1 day"/>
-                                <DatePicker value="{/EndDate}"  id="endDate" enabled="{g>/bOwner}"/>
-                                <TimePicker value="{/EndTime}"  enabled="{g>/bOwner}"/>
+                <Label text="Registration Duration"  required="true"
+                    tooltip="Only during this perios, employee can register"/>
+                <DateTimePicker value="{/RegStartDateTime}"  placeholder="From" 
+                    id="RegStartDateTime" enabled="{g>/bOwner}"/>
+                <DateTimePicker value="{/RegEndDateTime}"  placeholder="To" 
+                    id="RegEndDateTime" enabled="{g>/bOwner}"  changed="onDurationEndChanged"/>
 
-                                <Label text="Location" required="true"  />
-                                <Input value="{/Location}"  placeholder="location" enabled="{g>/bOwner}"/>
-                                
-                                <Label text="Description" tooltip="Detail description of the project" />
-                                <TextArea rows="2" value="{/Description}" enabled="{g>/bOwner}"
-                                    placeholder=" Special format such as http://xx, https:// mailto:mail@com will display as hyper link "/> 
+                <Label text="Location" required="true"  />
+                <Input value="{/Location}"  id="Location" placeholder="location" enabled="{g>/bOwner}"/>
+                
+                <Label text="Description" tooltip="Detail description of the project" />
+                <TextArea rows="2" value="{/Description}" enabled="{g>/bOwner}"
+                    placeholder=" Special format such as http://xx, https:// mailto:mail@com will display as hyper link "/> 
 
-                                <Label text="Link"  tooltip="URL which provide extra information"/>
-                                <Input value="{/Link}"  placeholder="wiki or jam page url" enabled="{g>/bOwner}"/>
+                <Label text="Link"  tooltip="URL which provide extra information"/>
+                <Input value="{/Link}"  placeholder="wiki or jam page url" enabled="{g>/bOwner}"/>
 
 
 
-                                <Label text="Form download URL"  tooltip="The URL of form downloading, only need if employee need upload some form "/>
-                                <Input value="{/FormDownloadUrl}"  placeholder="url of attachment user need sign and upload" enabled="{g>/bOwner}"/>
+                <Label text="Form download URL"  tooltip="The URL of form downloading, only need if employee need upload some form "/>
+                <Input value="{/FormDownloadUrl}"  placeholder="url of attachment user need sign and upload" enabled="{g>/bOwner}"/>
 
-                                <Label text="Support Multiple Entries" 
-                                    tooltip="One employee can create multiple entries, like the kid@sap one parent can register multiple children "/>
-                                <CheckBox selected="{/MultipleEntry}" text="If checked, one employee can create multiple entries" 
-                                    enabled="{g>/bOwner}"/>
+                <Label text="Support Multiple Entries" 
+                    tooltip="One employee can create multiple entries, like the kid@sap one parent can register multiple children "/>
+                <CheckBox selected="{/MultipleEntry}" text="If checked, one employee can create multiple entries" 
+                    enabled="{g>/bOwner}"/>
 
-                                <!-- <Label text="Display Project Information at the top of form" 
-                                    tooltip="If not checked, then user need click button to show project information"/>
-                                <CheckBox selected="{/DisplayProjectInfoAtTop}" text="If checked, employee can see project at the top" 
-                                    enabled="{g>/bOwner}"/> -->
+                <!-- <Label text="Display Project Information at the top of form" 
+                    tooltip="If not checked, then user need click button to show project information"/>
+                <CheckBox selected="{/DisplayProjectInfoAtTop}" text="If checked, employee can see project at the top" 
+                    enabled="{g>/bOwner}"/> -->
 
-                                <!-- <Label text="Deadline" tooltip="The deadline which employee must finish"/>
-                                <Input value="{/Deadline}"  enabled="{g>/bOwner}"/> 
- -->
-                                <Label text="Maximum Registration Limit" tooltip="The maximum number of registration"/>
-                                <!-- <Input value="{/MaxNum}"  enabled="{g>/bOwner}"/>  -->
-                                
+                <!-- <Label text="Deadline" tooltip="The deadline which employee must finish"/>
+                <Input value="{/Deadline}"  enabled="{g>/bOwner}"/> 
+-->
+                <Label text="Maximum Registration Limit" tooltip="The maximum number of registration"/>
+                <!-- <Input value="{/MaxNum}"  enabled="{g>/bOwner}"/>  -->
+                
 
-                            <Select selectedKey="{/RegistrationLimit_Ext}"  enabled="{g>/bOwner}">
-                                <core:Item  key="No"  text="No limit" />
-                                <core:Item  key="OneProject"  text="One project with limit" />
-                                <core:Item  key="SubProject" text="Sub-projects with limit" />
-                            </Select>
-                            <Input value="{/RegistrationLimit}"  placeholder="limitation number"
-                                visible="{= ${/RegistrationLimit_Ext} === 'OneProject'}" enabled="{g>/bOwner}"/>
-                            <Button text="Define Sub-project information"  press="onSubProjectDefinePressed"
-                                 visible="{= ${/RegistrationLimit_Ext} === 'SubProject'}" enabled="{g>/bOwner}">
-                                <layoutData> <layout:GridData span="XL3 L3 M3 S2"> </layout:GridData>
-                                </layoutData>    
-                            </Button>
+            <Select selectedKey="{/RegistrationLimit_Ext}"  enabled="{g>/bOwner}">
+                <core:Item  key="No"  text="No limit" />
+                <core:Item  key="OneProject"  text="One project with limit" />
+                <core:Item  key="SubProject" text="Sub-projects with limit" />
+            </Select>
+            <Input value="{/RegistrationLimit}"  placeholder="limitation number"
+                visible="{= ${/RegistrationLimit_Ext} === 'OneProject'}" enabled="{g>/bOwner}"/>
+            <Button text="Define Sub-project information"  press="onSubProjectDefinePressed"
+                 visible="{= ${/RegistrationLimit_Ext} === 'SubProject'}" enabled="{g>/bOwner}">
+                <layoutData> <layout:GridData span="XL3 L3 M3 S2"> </layout:GridData>
+                </layoutData>    
+            </Button>
 
-                                <Label text="Need Approve Process" tooltip=""/>
-                                <CheckBox selected="{/NeedApprove}" text="If needed, you can design Email Notify also"
-                                    enabled="{g>/bOwner}"/>
+                <Label text="Need Approve Process" tooltip=""/>
+                <CheckBox selected="{/NeedApprove}" text="Approve by administrator"
+                    select="onLoadDefaultEmailTemplatePressed"
+                    enabled="{g>/bOwner}"/>
 
-                                <!-- <Label text="Allow cancel myself" tooltip="" visible="{/NeedApprove}" />
-                                <CheckBox selected="{/AllowCancel}" visible="{/NeedApprove}" 
-                                    enabled="{g>/bOwner}"/> -->
+                <!-- <Label text="Allow cancel myself" tooltip="" visible="{/NeedApprove}" />
+                <CheckBox selected="{/AllowCancel}" visible="{/NeedApprove}" 
+                    enabled="{g>/bOwner}"/> -->
 
-                            <core:Title text="Security" />
-                                <Label text="Administrator" tooltip="The people can manage the project"/>
-                                <TextArea rows="2" value="{/Administrator}" placeholder="Employee ID, separate by ; or space" 
-                                    enabled="{g>/bOwner}"/> 
+            <core:Title text="Security" />
+                <Label text="Administrator" tooltip="The people can manage the project"/>
+                <TextArea rows="2" value="{/Administrator}" placeholder="Employee ID, separate by ; or space" 
+                    enabled="{g>/bOwner}"/> 
 
-                                <Label text="Project Public" />
-                                <CheckBox id="checkBoxProjectPublic" selected="{/ProjectPublic}" 
-                                    text="Control who can see the registrator information" 
-                                    enabled="{g>/bOwner}"/>
+                <Label text="Project Public" />
+                <CheckBox id="checkBoxProjectPublic" selected="{/ProjectPublic}" 
+                    text="Control who can see the registrator information" 
+                    enabled="{g>/bOwner}"/>
 
-                                <Label text="Registration Security" />
-                                <Select selectedKey="{/RegistrationSecurity}"  enabled="{g>/bOwner}">
-                                    <core:Item  key="Public"  text="Public -- All employee can see" />
-                                    <core:Item  key="Protected"  text="Protected -- Only register can see" />
-                                    <core:Item  key="Private"  text="Private  -- Only administrator can see" />
-                                </Select>
+                <Label text="Registration Security" />
+                <Select selectedKey="{/RegistrationSecurity}"  enabled="{g>/bOwner}">
+                    <core:Item  key="Public"  text="Public -- All employee can see" />
+                    <core:Item  key="Protected"  text="Protected -- Only register can see" />
+                    <core:Item  key="Private"  text="Private  -- Only administrator can see" />
+                </Select>
 
-                            <core:Title text="Project Overall Control" />
-                                <Label text="Status"  required="true" tooltip="Used to open or close registration" />
-                                <Select selectedKey="{/Status}" >
-                                    <core:Item  key="Opened"  text="Opened -- Employee can register" />
-                                    <core:Item  key="Closed"  text="Closed -- Employee can't register" />
-                                </Select>
+            <core:Title text="Project Overall Control" />
+                <Label text="Status"  required="true" tooltip="Used to open or close registration" />
+                <Select selectedKey="{/Status}" >
+                    <core:Item  key="Opened"  text="Opened -- Employee can register" />
+                    <core:Item  key="Closed"  text="Closed -- Employee can't register" />
+                </Select>
 
-                            </form:content>
-                        </form:SimpleForm>
+            </form:content>
+        </form:SimpleForm>
                     </content>
             </IconTabFilter>
             <IconTabFilter
@@ -125,7 +132,7 @@
                 icon="sap-icon://form">
                 <content>
 
-<table:Table  visibleRowCount="12"
+<table:Table  visibleRowCount="8"
          selectionMode="Single"
         rowSelectionChange="onFormTableRowSelectChanged"
         id="formTable"
@@ -218,7 +225,7 @@
 
             <table:Column width="18%">
                 <table:label>
-                    <Label text="Label" /> 
+                    <Label text="*Label" /> 
                 </table:label>
                 <table:template>
                     <Input value="{label}" enabled="{g>/bOwner}"/>
@@ -234,7 +241,7 @@
                 </table:template>
             </table:Column>
 
-            <table:Column width="30%">
+            <table:Column width="40%">
                 <table:label>
                     <Label text="Candidate seperate by ';'  valid for List/Radio type" 
                         tooltip="Only need when type is List. Seperate it by ;"/> 
@@ -246,14 +253,14 @@
                 </table:template>
             </table:Column>
 
-            <table:Column width="10%">
+            <!-- <table:Column width="10%">
                 <table:label>
                     <Label text="Customize" tooltip="Press the button to define content" /> 
                 </table:label>
                 <table:template>
                     <Button text="Define" visible="{path: 'type', formatter: '.fmtCandidate'}"/>  
                 </table:template>
-            </table:Column>
+            </table:Column> -->
             
         </table:columns>
     </table:Table>
@@ -284,32 +291,32 @@
                       labelSpanM="4"
                      >
                     <form:content>
-                        <Label text="Email notification for approve/reject/promote" required="true"/>
+                      <!--   <Label text="Email notification for approve/reject/promote" required="true"/>
                         <CheckBox selected="{/NeedEmailNotification}" text="If checked, employee will receive email for approve/reject/submitted" 
-                                    enabled="{g>/bOwner}"/>
+                                    enabled="{g>/bOwner}"/> -->
 
-                        <Label text="Design Tips"  
-                            visible="{/NeedEmailNotification}"/>
-                        <TextArea rows="4" id="emailTemplateTips" />
+                        <Label text="Design Tips"/>
+                        <TextArea rows="4" editable="false" id="emailTemplateTips" />
    
-                        <Label text="Approve Subject"  required="true" visible="{/NeedEmailNotification}" 
-                            tooltip="Subject used for approve registration"/>
-                        <Input value="{/EmailApproveSubject}" visible="{/NeedEmailNotification}"  enabled="{g>/bOwner}"/>
+                        <Label text="{= ${/NeedApprove} ? 'Approve Subject' : 'Submitted Subject' }"  
+                            required="true"  
+                            tooltip="Subject used for approve/submit registration"/>
+                        <Input value="{/EmailApproveSubject}"   enabled="{g>/bOwner}"/>
 
-                        <Label text="Approve Body"  required="true" tooltip="Content for approve registration"
-                            visible="{/NeedEmailNotification}"/>
-                        <TextArea rows="3" value="{/EmailApproveBody}" visible="{/NeedEmailNotification}" enabled="{g>/bOwner}"/> 
+                        <Label text="{= ${/NeedApprove} ? 'Approve Body' : 'Submitted Body' }"  required="true"/>
+                        <TextArea rows="3" value="{/EmailApproveBody}"  enabled="{g>/bOwner}"/> 
 
                         <Label text="Reject Subject"  required="true" 
-                            tooltip="Subject used for Reject registration" visible="{/NeedEmailNotification}"/>
-                        <Input value="{/EmailRejectSubject}"   visible="{/NeedEmailNotification}"/>
+                            visible="{= ${/NeedApprove} }"
+                            tooltip="Subject used for Reject registration" />
+                        <Input value="{/EmailRejectSubject}"   visible="{= ${/NeedApprove} }"/>
 
                         <Label text="Reject Body"  required="true" tooltip="Content for reject registration"
-                            visible="{/NeedEmailNotification}"/>
-                        <TextArea rows="3" value="{/EmailRejectBody}" enabled="{g>/bOwner}" visible="{/NeedEmailNotification}"/> 
+                            visible="{= ${/NeedApprove} }" />
+                        <TextArea rows="3" value="{/EmailRejectBody}" enabled="{g>/bOwner}" visible="{= ${/NeedApprove} }"/> 
 
-                         <Label text="Signature"  required="true" visible="{/NeedEmailNotification}" tooltip="Email Signature"/>
-                        <TextArea value="{/EmailSignature}"  rows="2" visible="{/NeedEmailNotification}" enabled="{g>/bOwner}"/>
+                         <Label text="Signature"  required="true"  tooltip="Email Signature"/>
+                        <TextArea value="{/EmailSignature}"  rows="2" enabled="{g>/bOwner}"/>
 
                     </form:content>
                 </form:SimpleForm>

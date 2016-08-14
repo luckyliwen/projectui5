@@ -62,6 +62,15 @@
                         press="onApproveRejectPressed">
                     </Button>
 
+                    <Button
+                        visible="false"  enabled="false"
+                        tooltip="Set status to Submitted"
+                        text="Promote"
+                        icon="sap-icon://activate"
+                        id="promoteBtn"
+                        press="onApproveRejectPressed">
+                    </Button>
+
                     <Button  id="downloadBtn"  visible = "false"  
                         text="Download Attachment"
                         icon="sap-icon://download"

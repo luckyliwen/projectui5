@@ -182,10 +182,22 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    //just one, copy the data
 	    if (this.currentResigerIndex != -1) {
 			this.mRegister = this.aRegister[ this.currentResigerIndex ];
-			this.mRegister.Agreement = true; //Only used for the new 
+			//for the other status, end user must accept the license, but for the new version, need manually accept it
+			if ( this.mRegister.Status != Enum.Status.New)
+				this.mRegister.Agreement = true; 
 		} else {
 			//now when user create new entry it will come here
 		}
+
+		//!!for the Radio type, it need set the initial value for the  first item 
+		for (var i=0; i < this.aFormCfg.length; i++) {
+		 	if ( this.aFormCfg[i].type == Enum.ControlType.Radio) {
+		 		var cfg = this.aFormCfg[i];
+		 		var aList = cfg.candidate.split(";");
+		 		this.mRegister[ cfg.property] = aList[0];
+		 	}
+		}
+
 		this.oModel.setData( this.mRegister );
 		this.updatePageTitle();
 		this.createOrUpdateFooterButton();
@@ -378,8 +390,21 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 					var cfg = this.aFormCfg[i];
 					if (cfg.mandatory) {
 						var realValue = this.mRegister[ cfg.property];
+						if (realValue == null) {
+							status = false;
+							break;
+						}
 	    				if (!realValue) {
-	    					status = false;
+	    					//for the Radio/List, only require the lenght not empty, 
+	    					//as the candidate value may like '0'
+	    					var type = cfg.type;
+	    					if (type == Enum.ControlType.List || type == Enum.ControlType.Radio) {
+	    						if ( realValue.length ==0) {
+	    							status = false;
+	    						} 
+	    					} else {
+	    						status = false;
+	    					}
 	    					break;
 		    			}
 					}

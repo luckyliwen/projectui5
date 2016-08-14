@@ -2,7 +2,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
 
-    <Dialog class="sapUiSizeCompact"  contentWidth="1280px"  contentHeight="600px"
+    <Dialog class="sapUiSizeCompact"  contentWidth="1500px"  contentHeight="600px"
         title="Define sub-project information and limitation">
         <content>
             <VBox>
@@ -29,26 +29,20 @@
                     <Column >
                         <header> <Text text="*Information" /> </header>
                     </Column>
-                    <Column > <header> <Text text="*Limitation"
+                    <Column width="50px"> <header> <Text text="*Limitation"
                                 tooltip="Empty or 0 means no limitation">
                             </Text> </header>
                     </Column>
                     <Column >
-                        <header> <Text text="Start Date" /> </header>
+                        <header> <Text text="Start Date/Time" /> </header>
                     </Column>
                     <Column >
-                        <header> <Text text="Start Time" /> </header>
-                    </Column>
-                    <Column >
-                        <header> <Text text="End Date" /> </header>
-                    </Column>
-                    <Column> 
-                        <header> <Text text="End Time" /> </header>
+                        <header> <Text text="End Date/Time" /> </header>
                     </Column>
                     <Column >
                         <header> <Text text="Location" /> </header>
                     </Column>                    
-                    <Column >
+                    <Column width="200px">
                         <header> <Text text="Description" /> </header>
                     </Column>                    
                     <Column width="110px">
@@ -62,11 +56,9 @@
                     <ColumnListItem>
                         <cells>
                             <Input value="{info}" />
-                            <Input value="{limit}" width="50px"/>
-                            <DatePicker value="{startDate}" />
-                            <TimePicker value="{startTime}"  />
-                            <DatePicker value="{endDate}" />
-                            <TimePicker value="{endTime}"  />
+                            <Input value="{limit}" />
+                            <DateTimePicker value="{startDateTime}" />
+                            <DateTimePicker value="{endDateTime}" />
                             <Input value="{location}" />
                             <TextArea value="{description}" rows="1"/>
 

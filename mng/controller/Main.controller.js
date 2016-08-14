@@ -119,7 +119,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		if ( this.isMyProjectSegmentSelected()) {
 			aFilter.push( new sap.ui.model.Filter({
 		 	  		filters: [
-		 	  			new sap.ui.model.Filter("Author", 'EQ', this.userId),
+		 	  			new sap.ui.model.Filter("Owner", 'EQ', this.userId),
 		 	  			new sap.ui.model.Filter("Administrator", 'Contains', this.userId)
 		 	  		],
 		 	    	and: false
@@ -129,7 +129,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 			aFilter.push( new sap.ui.model.Filter("ProjectPublic", 'EQ', true) );
 			var subFilter = new sap.ui.model.Filter({
 	 	  		filters: [
-	 	  			new sap.ui.model.Filter("Author", 'NE', this.userId)
+	 	  			new sap.ui.model.Filter("Owner", 'NE', this.userId)
 	 	  		],
 	 	    	and: true
 	 	    });
@@ -149,8 +149,8 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	},
 	
 	getDefaultProjectCfg: function() {
-	    return {
-	    	Author: this.userId,
+	    var mPrj =  {
+	    	Owner: this.userId,
 	    	AllowCancel: true,  Deadline: "",   Description: "",
 	    	DisplayProjectInfoAtTop: true,    Form: "",
 	    	Link: "",   MultipleEntry: false,  Title: "",
@@ -158,15 +158,25 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    	ProjectPublic: true,
 	    	RegistrationSecurity: 'Public', 
 	    	bOwner: true,
-	    	NeedEmailNotification: false,
+	    	NeedApprove: false,
+	    	NeedEmailNotification: true,
 	    	RegistrationLimit_Ext: "No",
 	    	SubProjectInfo: "",
 	    	SubProjectTitle: "Sub-Project",
-	    	StartDate: "", StartTime: "",
-	    	EndDate: "", EndTime: "",
+	    	EventStartDateTime: "", EventEndDateTime: "",
+	    	RegStartDateTime: "", RegEndDateTime: "",
 	    	Location: "",
 	    	Status: "Opened"
 	    };
+
+	    //now by default will have content
+		var template = Config.getConfigure().DefaultEmailTemplateNoApprove ;
+	    for (var key in template) {
+	    	mPrj[key] = template[key];
+	    }
+	    mPrj.TimezoneOffset = (new Date()).getTimezoneOffset();
+	    
+	    return mPrj;
 	},
 
 	setDetailPageTitle: function( evt ) {
@@ -307,14 +317,96 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    return true;
 	},
 	
+	checkNecessaryField: function( evt ) {
+	    var aMandatory = [
+	    	{key: "Title", name: "title"},
+	    	{key: "Location", name: "location"},
+	    	{key: "EventStartDateTime", name: "event duration (from)"},
+	    	{key: "EventEndDateTime", name: "event duration (to)"},
+	    	{key: "RegStartDateTime", name: "register duration (from)"},
+	    	{key: "EventEndDateTime", name: "register duration (to)"},
+	    ];
+
+	    for (var i=0; i < aMandatory.length; i++) {
+	    	var key = aMandatory[i].key;
+	    	if (! this.projectCfg[key]) {
+	    		Util.info("Please fill the field of " + aMandatory[i].name);
+	    		return false;
+	    	}
+	    }
+
+	    //event and reg end date need large than or equal start date/time
+	 	if ( !Util.isValidDuration(this.projectCfg.EventStartDateTime, this.projectCfg.EventEndDateTime)) {
+	 		Util.info("Event end date time must be later than start date time");
+	 		return false;
+	 	}
+	 	if ( !Util.isValidDuration(this.projectCfg.RegStartDateTime, this.projectCfg.RegEndDateTime)) {
+	 		Util.info("Register end date time must be later than start date time");
+	 		return false;
+	 	}
+
+	 	//limit part check
+		// RegistrationLimit
+ 		if ( this.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.OneProject) {
+ 			if ( !Util.isNumber(this.projectCfg.RegistrationLimit, false)) {
+ 				Util.info("Provide a number for Maximum Registration Limit");
+	 			return false;
+ 			}
+	    } else if ( this.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.SubProject) {
+	    	for (i=0; this.aSubProject && i < this.aSubProject.length; i++) {
+	    		if ( !this.aSubProject[i].info) {
+	    			var row = i+1;
+	    			Util.info("The label of " + row + " row of sub-project information is empty!");
+	 				return false;
+	    		}
+	    		//limit need be a number
+	    		if ( !Util.isNumber(this.aSubProject[i].limit, true)) {
+					Util.info("The limit of " + row + " row of sub-project information is invalid!");
+	 				return false;
+	    		}
+	    	}
+	    }
+
+	 	//the form design part 
+	    for (i=0; i < this.aFormCfg.length; i++) {
+	    	var curRow = i+1;
+	    	if ( !this.aFormCfg[i].label) {
+	    		Util.info("The label of " + curRow + " row in designed form is empty");
+	    		return false;
+	    	}
+	    	var type = this.aFormCfg[i].type;
+	    	if (type == Enum.ControlType.List || type == Enum.ControlType.Radio) {
+	    		var candidate = this.aFormCfg[i].candidate.trim();
+	    		if (candidate.length ==0) {
+	    			Util.info("The candidate of " + curRow + " row in designed form for Radio/List type is empty");
+	    			return false;		
+	    		} else {
+	    			//for list,must have ; 
+	    			var pos = candidate.indexOf(";");
+	    			if (pos == -1) {
+	    				Util.info("The candidate of " + curRow + " row in designed form for Radio/List type don't have ; ");
+	    				return false;		
+	    			}
+	    		}
+	    	}
+	    }
+
+	    //also for the aFrom, need check the label has value
+	    return true;
+	},
+	
+	onDurationEndChanged: function( evt ) {
+	    //??need check the end is later then start;
+	},
+	
 	onSavePressed: function( evt ) {
+		if (! this.checkNecessaryField()) {
+			return;
+		}
+
 		var bCreate = !this.projectCfg.ProjectId;
 		var that = this;
 
-		if (this.projectCfg.Title.trim().length == 0) {
-			Util.info('Please set the title first.');
-			return;
-		}
 		//also for the subProject define, need check it has been define successful
 		if ( this.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject) {
 			var subPrjOk = false;
@@ -332,7 +424,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 				}
 			}
 			if (!subPrjOk) {
-				Util.info("You select limitation as sub-project, but not define detail information for sub-projects!");
+				Util.info("You select limitation as sub-project, but not define detail information for all sub-projects!");
 				return;
 			}
 		}
@@ -367,7 +459,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		mData.SubProjectInfo = JSON.stringify( this.aSubProject);
 
 		delete mData.ProjectId;
-		delete mData.Author;
+		delete mData.Owner;
 		delete mData.ModifiedTime;
 		delete mData.__metadata;
 		delete mData.bOwner;
@@ -462,7 +554,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	},
 	
 
-	onPreviewPressed: function( evt ) {
+	onPreviewPressed: function( ) {
 	    if (!this.oPreviewDlg) {
 			this.oPreviewDlg = sap.ui.xmlfragment(this.getView().getId(), "csr.mng.view.Preview", this);
 	    }
@@ -623,7 +715,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
    		    this.aSubProject = null;
 
 	    	var bOwner = false;
-	    	if (this.userId == this.projectCfg.Author) {
+	    	if (this.userId == this.projectCfg.Owner) {
 				bOwner = true;
 			} else if (this.projectCfg.Administrator && this.projectCfg.Administrator.indexOf(this.userId) != -1) {
 				bOwner = true;
@@ -656,7 +748,6 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 
         //mapping from string to array, only need when project changed or not do init
         if ( this.aSubProject === null) {
-        	this.aSubProject = [];
 			if (this.projectCfg.SubProjectInfo) {
 				/*var aInfo = this.projectCfg.SubProjectInfo.split(";");
 				var aLimit = this.projectCfg.SubProjectLimit.split(";");
@@ -668,12 +759,15 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 				}*/
 				//it is a json format 
 				this.aSubProject = JSON.parse( this.projectCfg.SubProjectInfo);
-	        } else {
+	        } 
+
+	        //!!just ensure when the SubProjectInfo error, end uer still have chance to edit 
+	        if ( !this.aSubProject) {
 	        	//just 3 default raw 
 	        	this.aSubProject= [
-	        		{info: "", limit: "", startDate: "", startTime:"", endDate: "", endTime: "", location: "", description:"", status: "Opened"},
-	        		{info: "", limit: "", startDate: "", startTime:"", endDate: "", endTime: "", location: "", description:"", status: "Opened"},
-	        		{info: "", limit: "", startDate: "", startTime:"", endDate: "", endTime: "", location: "", description:"", status: "Opened"},
+	        		{info: "", limit: "", startDateTime: "", endDateTime:"", location: "", description:"", status: "Opened"},
+	        		{info: "", limit: "", startDateTime: "", endDateTime:"", location: "", description:"", status: "Opened"},
+	        		{info: "", limit: "", startDateTime: "", endDateTime:"", location: "", description:"", status: "Opened"},
 	        	];
 	        }
 	        this.oSubProjectModel.setData( this.aSubProject);
@@ -723,23 +817,21 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
         this.oSubProjectDlg.close();
 	},
 
-	onLoadDefaultEmailTemplatePressed: function( evt ) {
-	    var template = Config.getConfigure().DefaultEmailTemplate;
+	onLoadDefaultEmailTemplatePressed: function( ) {
+	    var template = this.projectCfg.NeedApprove ? 
+	    		Config.getConfigure().DefaultEmailTemplateApprove : Config.getConfigure().DefaultEmailTemplateNoApprove ;
 	    for (var key in template) {
 	    	this.oProjectModel.setProperty("/" + key, template[key]);
 	    }
 	},
 
 	//normally start and end date same day
-	onStartDateChanged: function( evt ) {
-	    var value = evt.getSource().getValue();
-	    if (value) {
-	    	var endDate = this.byId("endDate");
-	    	var endDateValue = endDate.getValue();
-	    	if ( !endDateValue) {
-	    		endDate.setValue(value);
-	    	}
-	    }
+	onEventStartDateChanged: function( evt ) {
+
+	},
+
+	onRegStartDateChanged: function( evt ) {
+
 	},
 	
 });

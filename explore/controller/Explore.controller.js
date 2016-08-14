@@ -82,7 +82,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 				that.userId = oData.UserId;
 				if ( !that.bAdmin) {
 					//if user is the author of project or inside the Administrator then also have the admin right 
-					if (that.userId == that.projectCfg.Author) {
+					if (that.userId == that.projectCfg.Owner) {
 						that.bAdmin = true;
 					} else if (that.projectCfg.Administrator && that.projectCfg.Administrator.indexOf(that.userId) != -1) {
 						that.bAdmin = true;
@@ -270,6 +270,8 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    	if ( this.projectCfg.NeedApprove) {
 	    		this.byId("approveBtn").setVisible(true);
 	    		this.byId("rejectBtn").setVisible(true);
+	    	} else {
+	    		this.byId("promoteBtn").setVisible(true);
 	    	}
 
 	    	//check if have one form is attachment  
@@ -293,19 +295,26 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    //only the Approved can donate
 	    var selIdx = this.oRegTable.getSelectedIndices();
 	    var bAllSubmited = false;
+	    var bAllWaiting = true;
 		for (var i=0; i < selIdx.length; i++) {
 			var context = this.oRegTable.getContextByIndex( selIdx[i]);
 			var status = context.getProperty("Status");
-			if (status != "Submitted") {
+			if (status != Enum.Status.Submitted) {
 				bAllSubmited = false;
 				break;
 			} else {
 				bAllSubmited = true;
 			}
+
+			if ( status != Enum.Status.Waiting) {
+				bAllWaiting = false;
+			}
 		}
+
 		this.byId("approveBtn").setEnabled( bAllSubmited );
 		this.byId("rejectBtn").setEnabled( bAllSubmited );
 		this.byId("deleteBtn").setEnabled( selIdx.length > 0 );
+	    this.byId("promoteBtn").setEnabled( selIdx.length > 0  && bAllWaiting);
 	    this.byId("emailBtn").setEnabled( selIdx.length > 0 );
 	},
 
@@ -345,12 +354,16 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		if (reason) {
 			mData.Status = Enum.Status.Rejected;
 	    	mData.RejectReason = reason;
+	    	
 	    	bApprove = false;
 		} else {
 			var id = oEvent.getSource().getId();
-			bApprove = (id.indexOf("approve") != -1);
+			bApprove = id.indexOf("approve") != -1;
+		    var bPromote =  id.indexOf("promote") != -1;
 		    if (bApprove) {
 		    	mData.Status = Enum.Status.Approved;
+		    } else if ( bPromote) {
+		    	mData.Status = Enum.Status.Submitted;
 		    } else {
 				this.openRejectDialog();
 		    	return;
@@ -362,7 +375,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 				that.getView().setBusy(false);
 				that.refreshRegisterTable();
 
-				var action = bApprove ? "Approve" : "Reject";
+				var action = mData.ActionFlag;
 				if ( failedItems ==0) {
 	        		Util.showToast(action + " successful!");
 				} else {
@@ -383,9 +396,11 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 
 	    //need get all selected items
 	    if ( mData.Status == Enum.Status.Approved) {
-	    	mData.ActionFlag = Enum.ActionFlag.Submit;	
+	    	mData.ActionFlag = Enum.ActionFlag.Approve;	
+	    } else if ( mData.Status == Enum.Status.Submitted) {
+	    	mData.ActionFlag = Enum.ActionFlag.Promote;	
 	    } else {
-	    	mData.ActionFlag = Enum.ActionFlag.Others;	
+	    	mData.ActionFlag = Enum.ActionFlag.Reject;	
 	    }
 
 		var selIdx = this.oRegTable.getSelectedIndices();

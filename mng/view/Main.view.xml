@@ -2,8 +2,8 @@
     controllerName="csr.mng.controller.Main"
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-
-    <SplitApp class="sapUiSizeCompact">
+<!-- class="sapUiSizeCompact" -->
+    <SplitApp >
         <masterPages>
             <Page
                 title="Project Management">
@@ -48,7 +48,7 @@
                                 </attributes>
                                 <firstStatus>
                                     <ObjectStatus
-                                        text="{Author}" state="Success">
+                                        text="{Owner}" state="Success">
                                     </ObjectStatus>
                                 </firstStatus>
                             </ObjectListItem>
