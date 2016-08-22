@@ -56,7 +56,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 				}
 				that.createRegisterTable();
 				that.createStatisTable();
-				that.freshStatisTable();
+				that.refreshStatisTable();
 
 				that.getUserInfo();
 			} else {
@@ -147,6 +147,8 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    if (this.projectCfg.NeedApprove) {
 	    	aCfg.push(["Approved Status", "Approved"]);
 	    	aCfg.push(["Rejected Status", "Rejected"]);
+	    } else {
+	    	aCfg.push(["Waiting Status", "Waiting"]);
 	    }
 
 	    for (var i=0; i < aCfg.length; i++) {
@@ -230,7 +232,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	},
 	
 
-	freshStatisTable: function( evt ) {
+	refreshStatisTable: function( evt ) {
 	    var that = this;
 		function onGetStatisSuccess(oData) {
 			that.setBusy(false);
@@ -327,8 +329,8 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	
 	onRefreshButtonpressed: function( evt ) {
 		var source = evt.getSource();
-		if ( source.getId().indexOf("freshStatisTable") != -1) {
-			this.freshStatisTable();
+		if ( source.getId().indexOf("refreshStatisTable") != -1) {
+			this.refreshStatisTable();
 		} else {
 		    this.refreshRegisterTable();
 		}
@@ -509,7 +511,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 			if ( successItems + failedItems == totalItems) {
 				that.getView().setBusy(false);
 				that.refreshRegisterTable();
-				that.refreshStatisTable();
+				that.rerefreshStatisTable();
 
 				var action = mData.ActionFlag;
 				if ( failedItems ==0) {
@@ -571,6 +573,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 			if ( successItems + failedItems == totalItems) {
 				that.getView().setBusy(false);
 				that.refreshRegisterTable();
+				that.refreshStatisTable();
 				
 				if ( failedItems ==0) {
 	        		Util.showToast("Delete successful!");

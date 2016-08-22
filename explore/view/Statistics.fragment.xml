@@ -13,7 +13,7 @@
                     <ToolbarSpacer />
                     <Button
                         text="Fresh"
-                        id="freshStatisTable"
+                        id="refreshStatisTable"
                         icon="sap-icon://refresh"
                         press="onRefreshButtonpressed">
                     </Button>

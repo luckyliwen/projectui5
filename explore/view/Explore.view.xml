@@ -11,7 +11,7 @@
                 selectedKey="Registrations">
                 <items>
                     <IconTabFilter
-                        text="Runners"  key="Registrations"
+                        text="Registrations"  key="Registrations"
                         icon="sap-icon://activity-individual">
                         <content>
                             <core:Fragment

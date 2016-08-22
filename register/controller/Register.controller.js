@@ -54,6 +54,27 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
     	this.mPendingUpdateAttachment = null;
 	},
 
+	checkRegTimeslot: function( ) {
+		var ret = false;
+		var regStart = new Date(this.projectCfg.RegStartDateTime);
+		var regEnd = new Date(this.projectCfg.RegEndDateTime);
+
+		//conver it to utc time 
+		var regUtcStart = regStart.getTime() + this.projectCfg.TimezoneOffset * 60 * 1000; 
+		var regUtcEnd = regEnd.getTime() + this.projectCfg.TimezoneOffset * 60 * 1000; 
+
+		var now = new Date();
+	    var nowUtc = now.getTime() + now.getTimezoneOffset()* 60 * 1000; 
+	    if ( nowUtc < regUtcStart) {
+			Util.info("Project registration not start, please wait till it starts at " + this.projectCfg.RegStartDateTime);
+	    } else if ( nowUtc > regUtcEnd) {
+	    	Util.info("Project registration has finished  at " + this.projectCfg.RegEndDateTime);
+	    } else {
+	    	ret = true;
+	    }
+	    this.projectOpened = ret;
+	},
+	
 	getProjectConfigure: function(  ) {
 	    var that = this;
 
@@ -65,27 +86,33 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 				//here  just set projectOpened by overall status 
 	    		that.addProjectCfgExtraProperty();
 
-				that.projectOpened = (that.projectCfg.Status == Enum.ProjectStatus.Opened);
+	    		//!!check whether now in the registration timeslot, 
+	    		that.checkRegTimeslot(); 
+				
+				//check the project level and sub-project level status 
 				if (that.projectOpened) {
-					//first check whether all the sub-project has closed, if so, inform user now
-					var allSubPrjClose  = true;
-					if ( that.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject) {
-						for (var i=0; i < that.aSubProject.length; i++) {
-							if ( that.aSubProject[i].status == Enum.ProjectStatus.Opened) {
-								allSubPrjClose = false;
-								break;
+					that.projectOpened = (that.projectCfg.Status == Enum.ProjectStatus.Opened);
+					if (that.projectOpened) {
+						//first check whether all the sub-project has closed, if so, inform user now
+						var allSubPrjClose  = true;
+						if ( that.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject) {
+							for (var i=0; i < that.aSubProject.length; i++) {
+								if ( that.aSubProject[i].status == Enum.ProjectStatus.Opened) {
+									allSubPrjClose = false;
+									break;
+								}
+							}
+							if ( allSubPrjClose) {
+								that.projectOpened = false;
 							}
 						}
-						if ( allSubPrjClose) {
-							that.projectOpened = false;
-						}
+					} 
+					if ( !that.projectOpened) {
+						that.byId("newEntryBtn").setEnabled(false);
+						Util.info("Project has been closed, can't register any more!");
 					}
-				} 
-				if ( !that.projectOpened) {
-					that.byId("newEntryBtn").setEnabled(false);
-					Util.info("Project has been closed, can't register any more!");
-				}
-
+				}	
+				
 				that.createRegisterScreen();
 
 				//as it may be have multiple entry, the entry select dialog need the project information, so need wait to get the project

@@ -606,7 +606,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    }
 	    
 	    function onDelError(error) {
-	    	this.setBusy(false);
+	    	that.setBusy(false);
 	    	Util.showError("Delete failed ", error);
 	    }
 
