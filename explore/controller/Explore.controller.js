@@ -32,6 +32,11 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 		this.getProjectConfigure();
 
 		this.oRegTable = this.byId('registrationTable');
+		this.oStatisTable = this.byId('statisTable');
+
+		this.aStatis = [];
+		this.oStatisModel = new sap.ui.model.json.JSONModel();
+
 		// Util.setTableColumnsFilterSortProperty(this.oRegTable);
 	},
 
@@ -50,6 +55,9 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 					return;
 				}
 				that.createRegisterTable();
+				that.createStatisTable();
+				that.freshStatisTable();
+
 				that.getUserInfo();
 			} else {
 				Util.info("Not get correct project configuration." + Enum.GeneralSolution);
@@ -126,6 +134,128 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    window.open(url);
 	},
 
+	createStatisTable: function( evt ) {
+	    var bSubPrj = this.projectCfg.RegistrationLimit_Ext  === Enum.RegistrationLimit.SubProject;
+
+	    //first is label, then property
+	    var aCfg =[["Drafted Status","Drafted"], ["Submitted Status","Submitted"], ["Canceled Status", "Canceled"] ];
+	    if (bSubPrj) {
+	    	aCfg.unshift([ this.projectCfg.SubProjectTitle, 'SubProject']);
+	    } 
+
+	    //depend on whether need approve, add the Approved/Rejected
+	    if (this.projectCfg.NeedApprove) {
+	    	aCfg.push(["Approved Status", "Approved"]);
+	    	aCfg.push(["Rejected Status", "Rejected"]);
+	    }
+
+	    for (var i=0; i < aCfg.length; i++) {
+	    	var  cfg = aCfg[i];
+		    var label = new sap.m.Label({text:cfg[0]});
+			var path = "{" + cfg[1] + "}";
+		/*	var template =  new sap.m.Text({
+						text: path,  maxLines:1, 
+			});*/
+			var template =  new sap.m.Label({
+						text: path,  
+						design: {
+							path: "summary",
+							formatter: function( value ) {
+							    if (value) {
+							    	return "Bold";
+							    } else {
+							    	return "Standard";
+							    }
+							}
+						}
+			});
+
+
+			var col = new sap.ui.table.Column({
+				label:  label,
+				template: template,
+				sortProperty: cfg[1],
+				filterProperty:  cfg[1]
+			});
+			this.oStatisTable.addColumn( col );
+		}
+
+		this.oStatisTable.setModel( this.oStatisModel);
+	},
+	
+	mergeStatisAndFreshTable:function( aResults) {
+	    var bSubPrj = this.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject;
+	    this.aStatis = [];
+	    var i, m, result;
+	    if (!bSubPrj) {
+	    	m = {};
+	    	for ( i=0; i < aResults.length; i++) {
+	    		result = aResults[i];  
+	    		//like  Status: 'Submitted', Count: 1
+	    		m[ result.Status ] = result.Count;
+	    	}
+	    	this.aStatis.push(m);
+	    } else {
+	    	//by the SubProject to know belong to which row 
+	    	var mSubPrjIndex = {};
+	    	var mSum = { SubProject: "Summary", summary: true};
+
+	    	for ( i=0; i < aResults.length; i++) {
+	    		result = aResults[i];  
+	    		//like  SubProject 'aa' Status: 'Submitted', Count: 1
+	    		var subPrj = result.SubProject;
+	    		if ( subPrj in mSubPrjIndex) {
+	    			m = this.aStatis[ mSubPrjIndex[subPrj] ];
+	    		} else {
+	    			//first time, then append to it 
+	    			m = { "SubProject": subPrj};
+	    			this.aStatis.push(m);
+	    			mSubPrjIndex[ subPrj ] = this.aStatis.length-1;
+	    		}
+	    		m[ result.Status ] = result.Count;
+
+				//need add to sum also 
+				if ( result.Status in mSum) {
+					mSum[ result.Status ] += result.Count;
+				} else {
+					mSum[ result.Status ] = result.Count;
+				}
+	    	}
+	    	//last entry is the sum 
+	    	this.aStatis.push( mSum);
+	    }
+
+	    this.oStatisModel.setData( this.aStatis);
+	    this.oStatisTable.setVisibleRowCount( this.aStatis.length);
+	},
+	
+
+	freshStatisTable: function( evt ) {
+	    var that = this;
+		function onGetStatisSuccess(oData) {
+			that.setBusy(false);
+			var aResult = JSON.parse(oData.GetStatusStatistics);
+			that.mergeStatisAndFreshTable( aResult );
+		}
+
+		function onGetStatisError(error) {
+			that.setBusy(false);
+			Util.showError("Failed to get statistics information.", error);
+		}
+
+		var url = "/GetStatusStatistics";
+		var bSubPrj = this.projectCfg.RegistrationLimit_Ext  == Enum.RegistrationLimit.SubProject ? 'true' : 'false';
+	    this.oDataModel.callFunction(url, {
+	    	urlParameters: { 'ProjectId': this.projectId, 'SubProject': bSubPrj},
+			method: "GET",
+			success: onGetStatisSuccess,
+			error: onGetStatisError
+		});
+
+	    this.setBusy(true);
+	},
+	
+
 	createRegisterTable: function() {
 	    //label: '', tooltip: '', property: '' mandatory: true, type: [input, date, list,attachment], candidate: ['male', 'famel'] 
 		//the UserId, SapUserName always need add , just add two cfg to the global aFromCfg
@@ -196,7 +326,12 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	},
 	
 	onRefreshButtonpressed: function( evt ) {
-	    this.refreshRegisterTable();
+		var source = evt.getSource();
+		if ( source.getId().indexOf("freshStatisTable") != -1) {
+			this.freshStatisTable();
+		} else {
+		    this.refreshRegisterTable();
+		}
 	},
 
 	onRegTableDataReceived: function( evt ) {
@@ -374,6 +509,7 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 			if ( successItems + failedItems == totalItems) {
 				that.getView().setBusy(false);
 				that.refreshRegisterTable();
+				that.refreshStatisTable();
 
 				var action = mData.ActionFlag;
 				if ( failedItems ==0) {

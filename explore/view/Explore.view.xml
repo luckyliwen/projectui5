@@ -7,35 +7,32 @@
     <Page   title="Coperator Social Responsibility Tool"  enableScrolling="false"
         titleLevel="H2" class="sapUiSizeCompact" >
         <content>
-    <table:Table id="registrationTable"  visibleRowCount="20"
-        showColumnVisibilityMenu="true"
-        selectionMode="MultiToggle"
-        rowSelectionChange="onRegistrationTableRowSelectChanged">
- <table:toolbar>
-            <Toolbar>
-                <content>
-                    <Title id="regTableText" />
-                    <ToolbarSpacer />
-                    <Title text="Tips: Press table column head for sort, filter... " />
-                    <ToolbarSpacer />
-                    <Button
-                        text="Fresh"
-                        id="freshTable"
-                        icon="sap-icon://refresh"
-                        press="onRefreshButtonpressed">
-                    </Button>
-                </content>
-            </Toolbar>
-        </table:toolbar>
-       <!--   <table:toolbar>
-            <Toolbar>
-                <content>
-                </content>
-            </Toolbar>
-        </table:toolbar> -->
-    </table:Table>
+ <IconTabBar expandable="false"  id="iconTabBar"  select="onTconTabBarSelectChanged"
+                selectedKey="Registrations">
+                <items>
+                    <IconTabFilter
+                        text="Runners"  key="Registrations"
+                        icon="sap-icon://activity-individual">
+                        <content>
+                            <core:Fragment
+                                fragmentName="csr.explore.view.Registration" type="XML">
+                            </core:Fragment>
+                        </content>
+                    </IconTabFilter>
 
-        </content>
+                    <IconTabFilter
+                        text="Statistics"  key="Statistics"
+                        icon="sap-icon://multiple-bar-chart">
+                        <content>
+                            <core:Fragment
+                                fragmentName="csr.explore.view.Statistics" type="XML">
+                            </core:Fragment>
+                        </content>
+                    </IconTabFilter>
+                </items>
+</IconTabBar>
+</content>
+
         <footer>
             <Bar>
                 <contentRight>
