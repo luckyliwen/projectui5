@@ -56,8 +56,10 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 
 	checkRegTimeslot: function( ) {
 		var ret = false;
-		var regStart = new Date(this.projectCfg.RegStartDateTime);
-		var regEnd = new Date(this.projectCfg.RegEndDateTime);
+		// var regStart = new Date(this.projectCfg.RegStartDateTime);
+		// var regEnd = new Date(this.projectCfg.RegEndDateTime);
+		var regStart = Util.getDateFromString(this.projectCfg.RegStartDateTime);
+		var regEnd = Util.getDateFromString(this.projectCfg.RegEndDateTime);
 
 		//conver it to utc time 
 		var regUtcStart = regStart.getTime() + this.projectCfg.TimezoneOffset * 60 * 1000; 
@@ -588,6 +590,7 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		delete mData.EntriesCount;
     	delete mData.RegisterId;
     	delete mData.Agreement;
+    	delete mData.__metadata;
 		
 	    //for the null value, need delete 
 	    for (var key in mData) {

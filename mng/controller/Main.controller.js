@@ -211,6 +211,11 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    this.aFormCfg = []; 
 	    this.oFormModel.setData(this.aFormCfg);
 	    this.aSubProject = null;
+
+		//update the global flag to control readonly 
+		this.oGlobalModel.setProperty('/bOwner', true);
+
+	    Util.info("Now you can modify as you like, then press 'Save' to save it.");
 	},
 
 	onActionSheetButtonPressed: function( evt ) {
@@ -509,6 +514,11 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
     	}
 		this.aFormCfg = aForm;
 		this.oFormModel.setData(this.aFormCfg);
+
+		//update the global flag to control readonly 
+		this.oGlobalModel.setProperty('/bOwner', true);
+
+	    Util.info("Now you can modify as you like, then press 'Save' to save it.");
 	},
 	
 	onOpenExplorePressed: function( evt ) {
@@ -712,7 +722,6 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	    		this.projectCfg.NeedEmailNotification = false;
 	    	}
 	    	this.addProjectCfgExtraProperty();
-   		    this.aSubProject = null;
 
 	    	var bOwner = false;
 	    	if (this.userId == this.projectCfg.Owner) {
@@ -770,8 +779,10 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	        		{info: "", limit: "", startDateTime: "", endDateTime:"", location: "", description:"", status: "Opened"},
 	        	];
 	        }
-	        this.oSubProjectModel.setData( this.aSubProject);
+	       
         }
+        this.oSubProjectModel.setData( this.aSubProject); 
+
         this.oSubProjectDlg.open();
 	},
 	
