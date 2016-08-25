@@ -424,9 +424,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 					}
 				}
 			} else {
-				if (this.projectCfg.SubProjectInfo) {
-					subPrjOk = true;
-				}
+				subPrjOk = false;
 			}
 			if (!subPrjOk) {
 				Util.info("You select limitation as sub-project, but not define detail information for all sub-projects!");
@@ -461,7 +459,7 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		};
 
 		var mData = jQuery.extend({}, true, this.projectCfg);
-		mData.SubProjectInfo = JSON.stringify( this.aSubProject);
+		
 
 		delete mData.ProjectId;
 		delete mData.Owner;
@@ -478,6 +476,9 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		//limit need mapping, now olingo need use string format
 		mData.RegistrationLimit = "" + Util.mapRegistrationLimitToNumber(that.projectCfg.RegistrationLimit_Ext, 
 			that.projectCfg.RegistrationLimit);
+		if (that.projectCfg.RegistrationLimit_Ext == Enum.RegistrationLimit.SubProject) {
+			mData.SubProjectInfo = JSON.stringify( this.aSubProject);	
+		}
 
 		//!!later we can check it during the operation, now just check it when save
 		var ret = this.assignPropertyToFormCfg();

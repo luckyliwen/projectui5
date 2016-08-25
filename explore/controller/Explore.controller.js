@@ -262,8 +262,9 @@ var ControllerController = BaseController.extend("csr.explore.controller.Explore
 	    //label: '', tooltip: '', property: '' mandatory: true, type: [input, date, list,attachment], candidate: ['male', 'famel'] 
 		//the UserId, SapUserName always need add , just add two cfg to the global aFromCfg
 		this.aFormCfg.unshift({property: 'Status', label: 'Status', tooltip: "Status"});
-		this.aFormCfg.unshift({property: 'SapUserName', label: 'SAP user name', tooltip: "SAP User name get from system", notVisible: true});
-		this.aFormCfg.unshift({property: 'UserId', label: 'SAP user ID', tooltip: "SAP User ID get from system"});
+		this.aFormCfg.unshift({property: 'UserName', label: 'User name', tooltip: "User name get from system"});
+		this.aFormCfg.unshift({property: 'UserId', label: 'User ID', tooltip: "User ID get from system"});
+
 		this.aFormCfg.unshift({property: 'SubmittedTime', label: 'Submitted Time', tooltip: "Submitted Time"});
 
 		var subPrjCfg = this.getSubProjectFormCfg(this.projectCfg);
