@@ -39,8 +39,12 @@
 
                 <Label text="Registration Duration"  required="true"
                     tooltip="Only during this perios, employee can register"/>
-                <DateTimePicker value="{/RegStartDateTime}"  placeholder="From" 
+<!--                 <DateTimePicker value="{/RegStartDateTime}"  placeholder="From" 
                     id="RegStartDateTime" enabled="{g>/bOwner}"/>
+ -->
+                 <DateTimePicker value="{path: 'RegStartDateTime', type: 'sap.ui.model.type.DateTime'}"  placeholder="From" 
+                    id="RegStartDateTime" enabled="{g>/bOwner}"/>
+
                 <DateTimePicker value="{/RegEndDateTime}"  placeholder="To" 
                     id="RegEndDateTime" enabled="{g>/bOwner}"  changed="onDurationEndChanged"/>
 
