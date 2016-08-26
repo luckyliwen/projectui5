@@ -68,9 +68,9 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 		var now = new Date();
 	    var nowUtc = now.getTime() + now.getTimezoneOffset()* 60 * 1000; 
 	    if ( nowUtc < regUtcStart) {
-			Util.info("Project registration not start, please wait till it starts at " + this.projectCfg.RegStartDateTime);
+			Util.info("Project registration not start, please wait till it starts at " + regStart);
 	    } else if ( nowUtc > regUtcEnd) {
-	    	Util.info("Project registration has finished  at " + this.projectCfg.RegEndDateTime);
+	    	Util.info("Project registration has finished  at " + regEnd);
 	    } else {
 	    	ret = true;
 	    }
