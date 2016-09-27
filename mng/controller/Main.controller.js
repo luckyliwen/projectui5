@@ -845,6 +845,9 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 	onRegStartDateChanged: function( evt ) {
 
 	},
+
+
+	
 	
 });
 
