@@ -1,5 +1,5 @@
 <core:FragmentDefinition
-    xmlns="sap.m"
+    xmlns="sap.m"  xmlns:mylib="csr.lib"
     xmlns:core="sap.ui.core">
 
     <Dialog class="sapUiSizeCompact"  contentWidth="1500px"  contentHeight="600px"
@@ -57,8 +57,8 @@
                         <cells>
                             <Input value="{info}" />
                             <Input value="{limit}" />
-                            <DateTimePicker value="{startDateTime}" />
-                            <DateTimePicker value="{endDateTime}" />
+                            <mylib:DateTimePickerExt timeValue="{startDateTime}" />
+                            <mylib:DateTimePickerExt timeValue="{endDateTime}" />
                             <Input value="{location}" />
                             <TextArea value="{description}" rows="1"/>
 

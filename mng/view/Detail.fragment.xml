@@ -32,16 +32,25 @@
                 
                 <Label text="Event Duration" required="true"
                     />
-                <DateTimePicker value="{/EventStartDateTime}"  placeholder="From" 
-                    id="EventStartDateTime" enabled="{g>/bOwner}"/>
-                <DateTimePicker value="{/EventEndDateTime}"  placeholder="To" 
+
+                <mylib:DateTimePickerExt timeValue="{/EventStartDateTime}"  placeholder="From" 
+                    id="EventStartDateTime" enabled="{g>/bOwner}"/> 
+               
+               <!-- <DateTimePicker value="{/EventStartDateTime}"  placeholder="From" 
+                    id="EventStartDateTime" enabled="{g>/bOwner}"/> -->
+
+                <mylib:DateTimePickerExt timeValue="{/EventEndDateTime}"  placeholder="To" 
                     id="EventEndDateTime" enabled="{g>/bOwner}" changed="onDurationEndChanged"/>
 
                 <Label text="Registration Duration"  required="true"
                     tooltip="Only during this perios, employee can register"/>
-                <DateTimePicker value="{/RegStartDateTime}"  placeholder="From" 
+<!--                 <DateTimePicker value="{/RegStartDateTime}"  placeholder="From" 
                     id="RegStartDateTime" enabled="{g>/bOwner}"/>
-                <DateTimePicker value="{/RegEndDateTime}"  placeholder="To" 
+ -->
+                <mylib:DateTimePickerExt timeValue="{/RegStartDateTime}"  placeholder="From" 
+                    id="RegStartDateTime" enabled="{g>/bOwner}"/>
+
+                <mylib:DateTimePickerExt timeValue="{/RegEndDateTime}"  placeholder="To" 
                     id="RegEndDateTime" enabled="{g>/bOwner}"  changed="onDurationEndChanged"/>
 
                 <Label text="Location" required="true"  />
