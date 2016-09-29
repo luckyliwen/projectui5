@@ -611,6 +611,11 @@ var ControllerController = BaseController.extend("csr.register.controller.Regist
 	    	mData.ActionFlag = Enum.ActionFlag.Others;	
 	    }
 	    
+	    //the Age need pass as number, 
+	    if ( 'Age' in mData) {
+	    	mData.Age = parseInt(mData.Age);
+	    }
+	    
 	    //?? for the Age, need use the number, sometimes it still need use the string 
 	    // if (mData.Age) {
 	    // 	mData.Age = parseInt(mData.Age);
