@@ -550,15 +550,24 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 			var root = Config.getConfigure().Ui5RootUrl;
 			newHref = root + "/" + newApp + "/index.html";
 		} else {
-			newHref = href.replace('/mng/',  '/' + newApp + '/');
+			//The current mng application may start from the big app such as https://projectui5-i068108trial.dispatcher.hanatrial.ondemand.com/?hc_reset
+			//so need check whether it was start from individual or from the big ap
+			if ( href.indexOf("/mng/") != -1) {
+				newHref = href.replace('/mng/',  '/' + newApp + '/');	
+			} else {
+				//just add /newApp/index.html to the end of .com/
+				var iSlashPos = href.lastIndexOf("/");
+				newHref = href.substring(0, iSlashPos + 1) + newApp + "/index.html";	
+			}
 		}
 
 		//then add the param: 
 		var pos = newHref.indexOf("?");
-		if (pos == -1) 
+		if (pos == -1) {
 			newHref += '?';
-		else 
+		} else  {
 			newHref += "&";
+		}
 
 		newHref += "projectId=" + this.projectCfg.ProjectId;
 		window.open(newHref);
