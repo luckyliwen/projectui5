@@ -1,0 +1,4 @@
+**Here will record some major changes
+1: 2018/09/04:  Used by beijing NBA, the register description part display just as one line, change css 
+   Fix export to file issue.
+     
