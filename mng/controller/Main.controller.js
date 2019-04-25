@@ -57,6 +57,21 @@ var ControllerController = BaseController.extend("csr.mng.controller.Main", {
 		gl = this.oList;
 	},
 
+	//!!for update the data
+	onMandatorySelected: function( oEvent) {
+		var checkbox = oEvent.getSource();
+		var sel = oEvent.getParameter("selected");
+		var bc = checkbox.getBindingContext();
+		if ( bc) {
+			var model = bc.getModel();
+			model.setProperty("mandatory", sel, bc);
+		}
+	},
+
+	fmtMandatory: function ( val ) {
+		return !!val;
+	},
+
 	fmtCandidate: function(type) {
 	    if (type == 'List' || type == 'Radio' || type == "Agreement")
 	    	return true;

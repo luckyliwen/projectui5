@@ -70,17 +70,11 @@
 
                 <Label text="Support Multiple Entries" 
                     tooltip="One employee can create multiple entries, like the kid@sap one parent can register multiple children "/>
-                <CheckBox selected="{/MultipleEntry}" text="If checked, one employee can create multiple entries" 
+                <CheckBox selected="{=!!${/MultipleEntry}}" text="If checked, one employee can create multiple entries" 
                     enabled="{g>/bOwner}"/>
 
-                <!-- <Label text="Display Project Information at the top of form" 
-                    tooltip="If not checked, then user need click button to show project information"/>
-                <CheckBox selected="{/DisplayProjectInfoAtTop}" text="If checked, employee can see project at the top" 
-                    enabled="{g>/bOwner}"/> -->
+       
 
-                <!-- <Label text="Deadline" tooltip="The deadline which employee must finish"/>
-                <Input value="{/Deadline}"  enabled="{g>/bOwner}"/> 
--->
                 <Label text="Maximum Registration Limit" tooltip="The maximum number of registration"/>
                 <!-- <Input value="{/MaxNum}"  enabled="{g>/bOwner}"/>  -->
                 
@@ -99,13 +93,9 @@
             </Button>
 
                 <Label text="Need Approve Process" tooltip=""/>
-                <CheckBox selected="{/NeedApprove}" text="Approve by administrator"
+                <CheckBox selected="{=!!${/NeedApprove}}" text="Approve by administrator"
                     select="onLoadDefaultEmailTemplatePressed"
                     enabled="{g>/bOwner}"/>
-
-                <!-- <Label text="Allow cancel myself" tooltip="" visible="{/NeedApprove}" />
-                <CheckBox selected="{/AllowCancel}" visible="{/NeedApprove}" 
-                    enabled="{g>/bOwner}"/> -->
 
             <core:Title text="Security" />
                 <Label text="Administrator" tooltip="The people can manage the project"/>
@@ -113,7 +103,7 @@
                     enabled="{g>/bOwner}"/> 
 
                 <Label text="Project Public" />
-                <CheckBox id="checkBoxProjectPublic" selected="{/ProjectPublic}" 
+                <CheckBox id="checkBoxProjectPublic" selected="{=!!${/ProjectPublic}}" 
                     text="Control who can see the registrator information" 
                     enabled="{g>/bOwner}"/>
 
@@ -210,7 +200,8 @@
                     <Label text="Mandatory" tooltip="Mandatory"/>
                 </table:label>
                 <table:template>
-                    <CheckBox selected="{mandatory}" enabled="{g>/bOwner}"/>
+                    <!-- !!check better solution later -->
+                    <CheckBox selected="{path: 'mandatory', formatter: '.fmtMandatory'}"  select = "onMandatorySelected" enabled="{g>/bOwner}"/>
                 </table:template>
             </table:Column>
 
@@ -262,14 +253,7 @@
                 </table:template>
             </table:Column>
 
-            <!-- <table:Column width="10%">
-                <table:label>
-                    <Label text="Customize" tooltip="Press the button to define content" /> 
-                </table:label>
-                <table:template>
-                    <Button text="Define" visible="{path: 'type', formatter: '.fmtCandidate'}"/>  
-                </table:template>
-            </table:Column> -->
+
             
         </table:columns>
     </table:Table>
@@ -300,9 +284,7 @@
                       labelSpanM="4"
                      >
                     <form:content>
-                      <!--   <Label text="Email notification for approve/reject/promote" required="true"/>
-                        <CheckBox selected="{/NeedEmailNotification}" text="If checked, employee will receive email for approve/reject/submitted" 
-                                    enabled="{g>/bOwner}"/> -->
+             
 
                         <Label text="Design Tips"/>
                         <TextArea rows="4" editable="false" id="emailTemplateTips" />
