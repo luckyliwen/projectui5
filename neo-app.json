@@ -1,80 +1,90 @@
 {
-	"welcomeFile": "mng/index.html",
-	"routes": [{
-			"path": "/resources",
-			"target": {
-				"type": "service",
-				"name": "sapui5",
-				
-				"entryPath": "/resources"
-			},
-			"description": "SAPUI5 Resources"
-		}, {
-			"path": "/test-resources",
-			"target": {
-				"type": "service",
-				"name": "sapui5",
-				
-				"entryPath": "/test-resources"
-			},
-			"description": "SAPUI5 Test Resources"
-		},
+  "welcomeFile": "mng/index.html",
+  "authenticationMethod": "saml",
+  "routes": [
+    {
+      "path": "/resources",
+      "target": {
+        "type": "service",
+        "name": "sapui5",
+        "version": "1.60.14",
+        "entryPath": "/resources"
+      },
+      "description": "SAPUI5 Resources"
+    },
 
-		{
-			"path": "/odata/projectodataSrv",
-			"target": {
-				"type": "destination",
-				"name": "projectodata",
-				"entryPath": "/ODataSrv"
-			},
-			"description": "projectodata Srv"
-		},
-
-		{
-			"path": "/attachmentUrl",
-			"target": {
-				"type": "destination",
-				"name": "projectodata",
-				"entryPath": "/Attachment"
-			},
-			"description": "Url for upload/download attachment"
-		},
-
-		{
-			"path": "/sap/ui5/1/resources/odata/projectodataSrv",
-			"target": {
-				"type": "destination",
-				"name": "projectodata",
-				"entryPath": "/ODataSrv"
-			},
-			"description": "projectodata Srv"
-		},
-		{
-			"path": "/sap/ui5/1/resources/attachmentUrl",
-			"target": {
-				"type": "destination",
-				"name": "projectodata",
-				"entryPath": "/Attachment"
-			},
-			"description": "Url for upload/download attachment"
-		}
-	],
-	"cacheControl": [{
-		"directive": "private",
-		"maxAge": 0,
-		"path": "*html"
-	}, {
-		"directive": "public",
-		"maxAge": 31536000
-	}],
-	"securityConstraints": [
-        {
-            
-            "description": "Access User Data",
-            "protectedPaths": [
-                "/"
-            ]
-        }
-    ]
-    
+    {
+      "path": "/test-resources",
+      "target": {
+        "type": "service",
+        "name": "sapui5",
+        "version": "1.60.14",
+        "entryPath": "/test-resources"
+      },
+      "description": "SAPUI5 Test Resources"
+    },
+    {
+      "path": "/odata/projectodataSrv",
+      "target": {
+        "type": "destination",
+        "name": "projectodata",
+        "entryPath": "/ODataSrv"
+      },
+      "description": "projectodata Srv"
+    },
+    {
+      "path": "/attachmentUrl",
+      "target": {
+        "type": "destination",
+        "name": "projectodata",
+        "entryPath": "/Attachment"
+      },
+      "description": "Url for upload/download attachment"
+    },
+    {
+      "path": "/sap/ui5/1/resources/odata/projectodataSrv",
+      "target": {
+        "type": "destination",
+        "name": "projectodata",
+        "entryPath": "/ODataSrv"
+      },
+      "description": "projectodata Srv"
+    },
+    {
+      "path": "/sap/ui5/1/resources/attachmentUrl",
+      "target": {
+        "type": "destination",
+        "name": "projectodata",
+        "entryPath": "/Attachment"
+      },
+      "description": "Url for upload/download attachment"
+    }
+  ],
+  "cacheControl": [
+    {
+      "directive": "private",
+      "maxAge": 0,
+      "path": "*html"
+    },
+    {
+      "directive": "public",
+      "maxAge": 31536000
+    }
+  ],
+  "securityConstraints": [
+    {
+      "description": "Public Access",
+      "protectedPaths": [
+        "/"
+      ]
+    },
+    {
+      "permission": "UI_ProjectAdmin",
+      "description": "Administrator",
+      "protectedPaths": [
+        "/mng",
+        "/explore"
+      ]
+    }
+  ]
 }
